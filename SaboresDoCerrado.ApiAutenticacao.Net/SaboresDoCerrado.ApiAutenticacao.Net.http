@@ -1,0 +1,6 @@
+@SaboresDoCerrado.ApiAutenticacao.Net_HostAddress = http://localhost:5022
+
+GET {{SaboresDoCerrado.ApiAutenticacao.Net_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

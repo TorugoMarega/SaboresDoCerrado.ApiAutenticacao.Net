@@ -1,0 +1,110 @@
+# Arquivo .gitignore para projetos .NET
+
+# Geral
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.suo
+*.user
+*.useros
+*.vspscc
+*.vssscc
+*.bak
+*.log
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.sync
+*.exe
+*.dll
+*.pdb
+*.tlog
+*.idb
+*.lib
+*.obj
+*.psmdcp
+*.rsp
+*.sbr
+*.res
+*.pch
+*.ipch
+*.com
+*.manifest
+*.lastbuildstate
+*.cache
+*.github
+
+# Projetos .NET/Visual Studio
+.vs/                  # Pasta de configurações do Visual Studio
+*.vs/   
+*.csproj.user
+*.resharper
+*.dotSettings
+*.bak
+*.log
+*.vmd
+*.vsmacros
+*.webtest
+*.testsettings
+*.trx
+*.ruleset
+*.licenseheader
+*.resharper
+*.DotSettings
+*.vsix
+*.sln.docstates
+*.fxcop
+*.rdlc
+*.datasource
+*.mdf
+*.ldf
+_UpgradeReport_Files/
+App.config.template
+Web.config.template
+install.log
+project.json.lock
+project.lock.json
+build/
+output/
+dist/
+packages/
+publish/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+*.props
+*.targets
+.nuget/
+nuget.config
+packages.config
+# exclude nuget package folders in the solution directory
+!**/packages/**/*.nupkg
+!**/packages/**/*.snupkg
+!**/packages/**/*.props
+!**/packages/**/*.targets
+
+# Visual Studio Code
+.vscode/
+
+# Ignore files produced by dotnet publish
+/publish
+/appsettings.Development.json # Normalmente você não quer versionar segredos de dev
+/appsettings.json # Não versionar, gerenciar com CI/CD ou Docker secrets
+# Exceção para arquivos de configuração em branco ou template
+!appsettings.json.example
+
+# Entity Framework Core Migrations
+Migrations/            # Exclui a pasta Migrations para evitar conflito (mas muitas vezes é versionada para controle)
+# Se você decidir versionar as migrações (o que é comum), remova a linha acima.
+# Deixe as migrações versionadas, o que estamos excluindo são os binários gerados.
+
+# Outros
+tmp/
+temp/
+
+# Sistema Operacional
+.DS_Store # macOS
+Thumbs.db # Windows
