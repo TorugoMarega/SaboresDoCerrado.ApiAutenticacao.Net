@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
+using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
+using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +13,8 @@ var connectionString = builder.Configuration.GetConnectionString("MysqlSeguranca
 
 builder.Services.AddDbContext<ContextoAplicacao>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 29))));
-
+builder.Services.AddScoped<IPerfilRepository, PerfilRepository>();
+builder.Services.AddScoped<IPerfilService, PerfilService>();
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 var app = builder.Build();
