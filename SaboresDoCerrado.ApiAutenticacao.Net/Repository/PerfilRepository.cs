@@ -14,7 +14,12 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         }
         public async Task<IEnumerable<Perfil>> ObterTodosAsync()
         {
-            return await _contexto.Perfis.ToListAsync();
+            return await _contexto.Perfil.ToListAsync();
+        }
+
+        public async Task<Perfil> ObterPorIdAsync(int id)
+        {
+            return await _contexto.Perfil.FirstOrDefaultAsync(p => p.Id == id);
         }
     }
 }

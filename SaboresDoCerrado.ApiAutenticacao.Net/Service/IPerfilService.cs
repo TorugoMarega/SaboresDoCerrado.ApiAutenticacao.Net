@@ -5,5 +5,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
     public interface IPerfilService
     {
         Task<IEnumerable<Perfil>> ObterTodosAsync();
+        Task<Perfil> ObterPorId(int id);
     }
 }
