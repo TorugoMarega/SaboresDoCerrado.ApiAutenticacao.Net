@@ -1,4 +1,6 @@
-﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model;
+﻿using Mapster;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
@@ -14,15 +16,20 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         }
 
         
-        public async Task<IEnumerable<Perfil>> ObterTodosAsync()
+        public async Task<IEnumerable<PerfilDTO>> ObterTodosAsync()
         {
-            
-            return await _repositorioPerfil.ObterTodosAsync();
+            var perfisEntidade = await _repositorioPerfil.ObterTodosAsync();
+            return perfisEntidade.Adapt<IEnumerable<PerfilDTO>>();
         }
-        public async Task<Perfil> ObterPorId(int id)
+        public async Task<PerfilDTO> ObterPorId(int id)
         {
-
-            return await _repositorioPerfil.ObterPorIdAsync(id);
+            var perfilEntidade = await _repositorioPerfil.ObterPorIdAsync(id);
+            if (perfilEntidade == null)
+            {
+                return null;
+            }
+            var perfilDto = perfilEntidade.Adapt<PerfilDTO>();
+            return  perfilDto;
         }
         
     }
