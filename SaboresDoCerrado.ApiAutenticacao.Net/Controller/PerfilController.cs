@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
@@ -26,9 +25,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         public async Task<IActionResult> GetPerfilPorId(int id)
         {
             var perfil = await _perfilService.ObterPorId(id);
-
+            if (perfil == null) { 
+            return NotFound();}
             return Ok(perfil);
         }
-        
     }
 }

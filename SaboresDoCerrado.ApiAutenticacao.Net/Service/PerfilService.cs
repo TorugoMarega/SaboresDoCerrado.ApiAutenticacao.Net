@@ -1,5 +1,4 @@
 ﻿using Mapster;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 
