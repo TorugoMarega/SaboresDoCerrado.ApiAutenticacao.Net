@@ -13,8 +13,14 @@ var connectionString = builder.Configuration.GetConnectionString("MysqlSeguranca
 
 builder.Services.AddDbContext<ContextoAplicacao>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 29))));
+
 builder.Services.AddScoped<IPerfilRepository, PerfilRepository>();
 builder.Services.AddScoped<IPerfilService, PerfilService>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 var app = builder.Build();
