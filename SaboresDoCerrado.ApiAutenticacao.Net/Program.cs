@@ -17,9 +17,11 @@ builder.Services.AddDbContext<ContextoAplicacao>(options =>
 builder.Services.AddScoped<IPerfilRepository, PerfilRepository>();
 builder.Services.AddScoped<IPerfilService, PerfilService>();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
@@ -30,6 +32,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+app.UsePathBase("/SaboresDoCerradoAuthApi");
 app.UseHealthChecks("/hc");
 app.UseAuthorization();
 app.MapControllers();

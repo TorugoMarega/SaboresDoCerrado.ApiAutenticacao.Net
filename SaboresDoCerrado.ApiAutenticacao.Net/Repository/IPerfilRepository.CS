@@ -1,4 +1,4 @@
-﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model;
+﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
 {

@@ -1,4 +1,4 @@
-﻿namespace SaboresDoCerrado.ApiAutenticacao.Net.Model
+﻿namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.entity
 {
     public class UsuarioPerfil
     {

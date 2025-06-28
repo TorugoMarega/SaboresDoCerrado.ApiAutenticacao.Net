@@ -5,7 +5,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request
     public class RegistroRequestDTO
     {
         [Required(ErrorMessage = "O nome de usuário é obrigatório.")]
-        public string NomeUsuario { get; set; }
+        public string Nome { get; set; }
 
         [Required(ErrorMessage = "O e-mail é obrigatório.")]
         [EmailAddress(ErrorMessage = "O formato do e-mail é inválido.")]
