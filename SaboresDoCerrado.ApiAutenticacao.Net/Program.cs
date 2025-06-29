@@ -2,6 +2,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
+using SaboresDoCerrado.ApiAutenticacao.Net.Middleware;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Reflection;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
+
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 var app = builder.Build();
@@ -48,6 +50,7 @@ app.UsePathBase("/SaboresDoCerradoAuthApi");
 app.UseHealthChecks("/hc");
 app.UseAuthorization();
 app.MapControllers();
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {

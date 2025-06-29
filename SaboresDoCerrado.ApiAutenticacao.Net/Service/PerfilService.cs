@@ -7,16 +7,19 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
     public class PerfilService : IPerfilService
     {
         private readonly IPerfilRepository _perfilRepository;
+        private readonly ILogger<PerfilService> _logger;
 
 
-        public PerfilService(IPerfilRepository repositorioPerfil)
+        public PerfilService(IPerfilRepository repositorioPerfil, ILogger<PerfilService> logger)
         {
             _perfilRepository = repositorioPerfil;
+            _logger = logger;
         }
 
 
         public async Task<IEnumerable<PerfilDTO>> ObterTodosAsync()
         {
+            _logger.LogInformation("Iniciando listagem de Perfis");
             var perfisEntidade = await _perfilRepository.ObterTodosAsync();
             return perfisEntidade.Adapt<IEnumerable<PerfilDTO>>();
         }
