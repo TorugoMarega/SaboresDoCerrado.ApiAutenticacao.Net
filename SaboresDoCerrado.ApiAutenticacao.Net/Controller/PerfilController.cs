@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
-using System.Net;
+using System.Diagnostics;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 {
@@ -17,25 +17,47 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet("listar")]
-        public async Task<IActionResult> GetPerfis()
+        public async Task<IActionResult> GetPerfisAsync()
         {
-            _logger.LogInformation("Requisicao recebida - METHOD: GET, ENDPOINT: /perfil/listar");
+            var stopwatch = Stopwatch.StartNew();
+            _logger.LogInformation("Requisição recebida para listar todos os perfis.");
             var perfis = await _perfilService.ObterTodosAsync();
-            _logger.LogInformation("Requisicao finalizada - METHOD: GET, ENDPOINT: /perfil/listar, STATUS: {}", HttpStatusCode.OK.ToString());
+            stopwatch.Stop();
+            _logger.LogInformation(
+                "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                HttpContext.Request.Method,
+                HttpContext.Request.Path,
+                200,
+                stopwatch.ElapsedMilliseconds
+            );
             return Ok(perfis);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPerfilPorId(int id)
+        public async Task<IActionResult> GetPerfilPorIdAsync(int id)
         {
-            _logger.LogInformation("METHOD: GET, ENDPOINT: /perfil/{}", id);
+            var stopwatch = Stopwatch.StartNew();
+            _logger.LogInformation("Requisição recebida para buscar perfil por ID: {ID}.", id);
             var perfil = await _perfilService.ObterPorId(id);
-            if (perfil == null)
+            stopwatch.Stop();
+            if (perfil is null)
             {
-                _logger.LogWarning("Requisicao finalizada - METHOD: GET, ENDPOINT: /perfil/{}, STATUS: {}", id,HttpStatusCode.NotFound.ToString());
-                return NotFound("Perfil não encontrado");
+                _logger.LogWarning(
+                    "Perfil não encontrado. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    404,
+                    stopwatch.ElapsedMilliseconds
+                );
+                return NotFound();
             }
-            _logger.LogInformation("Requisicao finalizada - METHOD: GET, ENDPOINT: /perfil/{}, STATUS: {}", id, HttpStatusCode.OK.ToString());
+            _logger.LogInformation(
+                "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                HttpContext.Request.Method,
+                HttpContext.Request.Path,
+                200,
+                stopwatch.ElapsedMilliseconds
+            );
             return Ok(perfil);
         }
     }
