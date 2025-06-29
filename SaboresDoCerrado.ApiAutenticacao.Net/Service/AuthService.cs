@@ -1,5 +1,4 @@
 ﻿using Mapster;
-using MapsterMapper;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.response;
@@ -18,16 +17,24 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             _userRepository = userRepository;
             _configuration = configuration;
         }
-        public async Task<UsuarioDTO> ResgistrarAsync(RegistroRequestDTO registroRequestDTO) {
+        public async Task<UsuarioDTO> ResgistrarAsync(RegistroRequestDTO registroRequestDTO)
+        {
             var usuarioEntidade = registroRequestDTO.Adapt<Usuario>();
-            usuarioEntidade.DataCriacao = DateTime.Now;
-            usuarioEntidade.DataAtualizacao = DateTime.Now;
-            usuarioEntidade.HashSenha = registroRequestDTO.Senha;
+            usuarioEntidade.DataCriacao = DateTime.UtcNow;
+            usuarioEntidade.DataAtualizacao = DateTime.UtcNow;
+            usuarioEntidade.HashSenha = BCrypt.Net.BCrypt.HashPassword(registroRequestDTO.Senha);
+            usuarioEntidade.UsuarioPerfil = registroRequestDTO.PerfilIds.Select(perfilId => new UsuarioPerfil
+            {
+                PerfilId = perfilId
+            }).ToList();
+
             await _userRepository.RegistrarUsuarioAsync(usuarioEntidade);
-            return usuarioEntidade.Adapt<UsuarioDTO>();
+            var usuarioDTO = usuarioEntidade.Adapt<UsuarioDTO>();
+            return usuarioDTO;
         }
-        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO) { 
-            throw new System.NotImplementedException(); 
+        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
+        {
+            throw new System.NotImplementedException();
         }
 
     }

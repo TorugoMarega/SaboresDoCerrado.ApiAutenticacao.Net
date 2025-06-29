@@ -4,7 +4,7 @@ using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
 {
-    public class PerfilRepository:IPerfilRepository
+    public class PerfilRepository : IPerfilRepository
     {
         private readonly ContextoAplicacao _contexto;
 

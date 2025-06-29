@@ -1,13 +1,11 @@
-﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
-using Mapster;
-using Microsoft.EntityFrameworkCore;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
 {
-    public class UsuarioRepository:IUsuarioRepository
+    public class UsuarioRepository : IUsuarioRepository
     {
         private readonly ContextoAplicacao _contextoAplicacao;
 
@@ -16,13 +14,37 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             _contextoAplicacao = contextoAplicacao;
         }
 
-        public async Task RegistrarUsuarioAsync(Usuario usuario) {
+        public async Task RegistrarUsuarioAsync(Usuario usuario)
+        {
             _contextoAplicacao.Add(usuario);
             await _contextoAplicacao.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Usuario>> ObterTodosAsync() {
-            return await _contextoAplicacao.Usuario.ToListAsync();
+        public async Task<IEnumerable<UsuarioDTO>> ObterTodosAsync()
+        {
+            return await _contextoAplicacao.Usuario
+                   .Select(usuario => new UsuarioDTO
+                   {
+                       Id = usuario.Id,
+                       Nome = usuario.Nome, // Garanta que os nomes das propriedades batem
+                       Email = usuario.Email,
+                       Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
+                   })
+                   .ToListAsync();
+        }
+
+        public async Task<UsuarioDTO> ObterPorIdAsync(int id)
+        {
+            return await _contextoAplicacao.Usuario
+                .Where(usuario => usuario.Id == id)
+                .Select(usuario => new UsuarioDTO
+                {
+                    Id = usuario.Id,
+                    Nome = usuario.Nome,
+                    Email = usuario.Email,
+                    Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

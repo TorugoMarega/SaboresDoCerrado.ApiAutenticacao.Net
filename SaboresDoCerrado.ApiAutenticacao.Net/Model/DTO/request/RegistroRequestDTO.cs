@@ -14,5 +14,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request
         [Required(ErrorMessage = "A senha é obrigatória.")]
         [MinLength(6, ErrorMessage = "A senha deve ter no mínimo 6 caracteres.")]
         public string Senha { get; set; }
+
+        [Required]
+        [MinLength(1, ErrorMessage = "O usuário deve ter no mínimo um perfil.")]
+        public List<int> PerfilIds { get; set; }
     }
 }

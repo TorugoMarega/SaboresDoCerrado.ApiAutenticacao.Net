@@ -1,5 +1,4 @@
 ﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
@@ -7,7 +6,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
     public interface IUsuarioRepository
     {
         Task RegistrarUsuarioAsync(Usuario usuario);
-        Task<IEnumerable<Usuario>> ObterTodosAsync();
+        Task<IEnumerable<UsuarioDTO>> ObterTodosAsync();
+        Task<UsuarioDTO> ObterPorIdAsync(int id);
         //UsuarioDTO Login(LoginRequestDTO loginRequestDTO);
     }
 }

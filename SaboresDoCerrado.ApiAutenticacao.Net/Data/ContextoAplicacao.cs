@@ -5,7 +5,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Data
 {
     public class ContextoAplicacao : DbContext
     {
-        public ContextoAplicacao (DbContextOptions<ContextoAplicacao> options) : base(options) { }
+        public ContextoAplicacao(DbContextOptions<ContextoAplicacao> options) : base(options) { }
         public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Perfil> Perfil { get; set; }
         public DbSet<UsuarioPerfil> UsuarioPerfi { get; set; }
@@ -18,5 +18,5 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Data
             modelBuilder.Entity<Perfil>().ToTable("tbl_perfil");
             modelBuilder.Entity<UsuarioPerfil>().ToTable("tbl_usuario_x_perfil");
         }
-    } 
+    }
 }
