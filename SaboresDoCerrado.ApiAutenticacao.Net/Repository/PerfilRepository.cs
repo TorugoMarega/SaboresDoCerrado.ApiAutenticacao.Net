@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
 {
@@ -20,7 +19,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             _logger.LogInformation("Iniciando busca de todos os perfis no banco de dados");
             var perfis = await _contexto.Perfil
                 .AsNoTracking()
-                .Select(perfil => new PerfilDTO { 
+                .Select(perfil => new PerfilDTO
+                {
                     Id = perfil.Id,
                     Descricao = perfil.Descricao,
                     Nome = perfil.Nome
@@ -35,7 +35,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             var perfil = await _contexto.Perfil
                 .AsNoTracking()
                 .Where(perfil => perfil.Id == id)
-                .Select(perfil => new PerfilDTO { 
+                .Select(perfil => new PerfilDTO
+                {
                     Id = perfil.Id,
                     Descricao = perfil.Descricao,
                     Nome = perfil.Nome

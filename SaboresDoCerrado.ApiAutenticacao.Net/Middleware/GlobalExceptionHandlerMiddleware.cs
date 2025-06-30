@@ -14,9 +14,10 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Middleware
             _logger = logger;
         }
 
-        public async Task InvokeAsync (HttpContext context)
+        public async Task InvokeAsync(HttpContext context)
         {
-            try {
+            try
+            {
                 await _next(context);
             }
             catch (Exception ex)

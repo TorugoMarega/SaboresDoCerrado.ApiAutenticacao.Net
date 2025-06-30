@@ -36,7 +36,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
-
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 var app = builder.Build();

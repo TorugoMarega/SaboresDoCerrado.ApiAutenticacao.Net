@@ -8,7 +8,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Data
         public ContextoAplicacao(DbContextOptions<ContextoAplicacao> options) : base(options) { }
         public DbSet<Usuario> Usuario { get; set; }
         public DbSet<Perfil> Perfil { get; set; }
-        public DbSet<UsuarioPerfil> UsuarioPerfi { get; set; }
+        public DbSet<UsuarioPerfil> UsuarioPerfis { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
