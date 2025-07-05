@@ -7,6 +7,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
     public interface IAuthService
     {
         Task<UsuarioDTO> ResgistrarAsync(RegistroRequestDTO registroRequestDTO);
-        Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO);
+        Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO loginRequestDTO);
     }
 }

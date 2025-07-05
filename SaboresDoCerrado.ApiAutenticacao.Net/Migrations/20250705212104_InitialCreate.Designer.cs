@@ -12,8 +12,8 @@ using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Migrations
 {
     [DbContext(typeof(ContextoAplicacao))]
-    [Migration("20250705150444_AdicionaIndicesUnicosParaUsuario")]
-    partial class AdicionaIndicesUnicosParaUsuario
+    [Migration("20250705212104_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,6 +67,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Migrations
                     b.Property<string>("HashSenha")
                         .IsRequired()
                         .HasColumnType("longtext");
+
+                    b.Property<bool>("IsAtivo")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("NomeCompleto")
                         .IsRequired()

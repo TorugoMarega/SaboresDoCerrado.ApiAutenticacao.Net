@@ -7,6 +7,7 @@
         public required string NomeCompleto { get; set; }
         public required string HashSenha { get; set; }
         public required string Email { get; set; }
+        public required bool IsAtivo { get; set; }
         public required DateTime DataCriacao { get; set; }
         public required DateTime DataAtualizacao { get; set; }
         public ICollection<UsuarioPerfil> UsuarioPerfil { get; set; }

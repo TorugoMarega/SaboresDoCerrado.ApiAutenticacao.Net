@@ -45,6 +45,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
                 NomeCompleto = registroRequestDTO.NomeCompleto,
                 Email = registroRequestDTO.Email,
                 HashSenha = BCrypt.Net.BCrypt.HashPassword(registroRequestDTO.Senha),
+                IsAtivo = true,
                 DataCriacao = DateTime.UtcNow,
                 DataAtualizacao = DateTime.UtcNow,
                 UsuarioPerfil = registroRequestDTO.PerfilIds.Select(pId => new UsuarioPerfil { PerfilId = pId }).ToList()
@@ -72,6 +73,12 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             if (loginDTO is null)
             {
                 var msgLogin = "Usuário [{usuario}] não existe na base!".Replace("{usuario}", loginRequestDTO.NomeUsuario);
+                _logger.LogWarning("Tentativa de login falhou: {mensagem}", msgLogin);
+                throw new InvalidOperationException(msgLogin);
+            }
+            if (loginDTO.IsAtivo is false)
+            {
+                var msgLogin = "Usuário [{usuario}] está inativo, por favor entre em contato com um Administrador!".Replace("{usuario}", loginRequestDTO.NomeUsuario);
                 _logger.LogWarning("Tentativa de login falhou: {mensagem}", msgLogin);
                 throw new InvalidOperationException(msgLogin);
             }

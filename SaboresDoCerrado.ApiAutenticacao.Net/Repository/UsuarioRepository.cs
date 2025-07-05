@@ -30,6 +30,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                        Id = usuario.Id,
                        NomeUsuario = usuario.NomeUsuario,
                        NomeCompleto = usuario.NomeCompleto,
+                       IsAtivo = usuario.IsAtivo,
                        Email = usuario.Email,
                        Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                    })
@@ -46,6 +47,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                     Id = usuario.Id,
                     NomeUsuario = usuario.NomeUsuario,
                     NomeCompleto = usuario.NomeCompleto,
+                    IsAtivo = usuario.IsAtivo,
                     Email = usuario.Email,
                     Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })
@@ -66,12 +68,13 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
-                .Where(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower())
+                .Where(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower() & usuario.IsAtivo)
                 .Select(usuario => new UsuarioDTO
                 {
                     Id = usuario.Id,
                     NomeUsuario = usuario.NomeUsuario,
                     NomeCompleto = usuario.NomeCompleto,
+                    IsAtivo = usuario.IsAtivo,
                     Email = usuario.Email,
                     Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })
@@ -111,6 +114,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                     Id = usuario.Id,
                     NomeUsuario = usuario.NomeUsuario,
                     Email = usuario.Email,
+                    IsAtivo = usuario.IsAtivo,
                     HashSenha = usuario.HashSenha,
                     Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })

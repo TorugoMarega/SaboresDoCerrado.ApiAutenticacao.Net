@@ -65,6 +65,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsAtivo")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<string>("NomeCompleto")
                         .IsRequired()
                         .HasColumnType("longtext");
