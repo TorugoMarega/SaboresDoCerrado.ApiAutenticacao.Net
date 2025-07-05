@@ -9,6 +9,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         Task<IEnumerable<UsuarioDTO>> ObterTodosAsync();
         Task<UsuarioDTO?> ObterPorIdAsync(int id);
         Task<bool> EmailExistsAsync(string email);
+        Task<bool> NomeUsuarioExistsAsync(string NomeUsuario);
+        Task<string?> VerificarConflitoAsync(string NomeUsuario, string Email);
         //UsuarioDTO Login(LoginRequestDTO loginRequestDTO);
     }
 }

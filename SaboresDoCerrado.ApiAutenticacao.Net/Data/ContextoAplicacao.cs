@@ -17,6 +17,14 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Data
             modelBuilder.Entity<Usuario>().ToTable("tbl_usuario");
             modelBuilder.Entity<Perfil>().ToTable("tbl_perfil");
             modelBuilder.Entity<UsuarioPerfil>().ToTable("tbl_usuario_x_perfil");
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.NomeUsuario)
+                .IsUnique(); // UNIQUE
+
+            modelBuilder.Entity<Usuario>()
+                .HasIndex(u => u.Email) // UNIQUE
+                .IsUnique();
         }
     }
 }

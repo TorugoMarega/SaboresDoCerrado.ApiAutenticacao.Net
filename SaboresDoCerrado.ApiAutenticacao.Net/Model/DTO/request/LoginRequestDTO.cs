@@ -4,7 +4,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request
 {
     public class LoginRequestDTO
     {
-        [Required(ErrorMessage = "O nome de usuário é obrigatório.")]
+        [RegularExpression(@"^\S*$", ErrorMessage = "O nome de usuário não pode conter espaços.")]
+        [Required(ErrorMessage = "O identificador de usuário é obrigatório.")]
         public string NomeUsuario { get; set; }
 
         [Required(ErrorMessage = "A senha é obrigatória.")]

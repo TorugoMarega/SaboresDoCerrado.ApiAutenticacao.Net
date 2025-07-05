@@ -28,7 +28,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                    .Select(usuario => new UsuarioDTO
                    {
                        Id = usuario.Id,
-                       Nome = usuario.Nome, // Garanta que os nomes das propriedades batem
+                       NomeUsuario = usuario.NomeUsuario,
+                       NomeCompleto = usuario.NomeCompleto,
                        Email = usuario.Email,
                        Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                    })
@@ -39,13 +40,14 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
-                .Where(u => u.Id == id)
-                .Select(u => new UsuarioDTO
+                .Where(usuario => usuario.Id == id)
+                .Select(usuario => new UsuarioDTO
                 {
-                    Id = u.Id,
-                    Nome = u.Nome,
-                    Email = u.Email,
-                    Perfis = u.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
+                    Id = usuario.Id,
+                    NomeUsuario = usuario.NomeUsuario,
+                    NomeCompleto = usuario.NomeCompleto,
+                    Email = usuario.Email,
+                    Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })
                 .FirstOrDefaultAsync();
         }
@@ -53,6 +55,32 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         public async Task<bool> EmailExistsAsync(string email)
         {
             return await _contextoAplicacao.Usuario.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> NomeUsuarioExistsAsync(string NomeUsuario) {
+            return await _contextoAplicacao.Usuario.AnyAsync(usuario => usuario.NomeUsuario == NomeUsuario);
+        }
+
+        public async Task<string?> VerificarConflitoAsync(string NomeUsuario, string Email) {
+            var UsuarioExistente = await _contextoAplicacao.Usuario
+                .AsNoTracking()
+                .FirstOrDefaultAsync(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower() || usuario.Email.ToLower() == Email.ToLower());
+            if (UsuarioExistente is null)
+            {
+                return null;
+            }
+            // Se encontrou um usuário, verifica qual campo deu conflito e retorna a mensagem apropriada.
+            if (UsuarioExistente.NomeUsuario.Equals(NomeUsuario, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return "O nome de usuário já está em uso";
+            }
+
+            if (UsuarioExistente.Email.Equals(Email, StringComparison.InvariantCultureIgnoreCase))
+            {
+                return "O e-mail já está cadastrado na base";
+            }
+
+            return "Erro desconhecido de validação";
         }
     }
 }
