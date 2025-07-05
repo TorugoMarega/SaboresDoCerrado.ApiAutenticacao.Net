@@ -57,11 +57,29 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             return await _contextoAplicacao.Usuario.AnyAsync(u => u.Email == email);
         }
 
-        public async Task<bool> NomeUsuarioExistsAsync(string NomeUsuario) {
+        public async Task<bool> NomeUsuarioExistsAsync(string NomeUsuario)
+        {
             return await _contextoAplicacao.Usuario.AnyAsync(usuario => usuario.NomeUsuario == NomeUsuario);
         }
 
-        public async Task<string?> VerificarConflitoAsync(string NomeUsuario, string Email) {
+        public async Task<UsuarioDTO?> ObterUsuarioPorNomeUsuarioAsync(string NomeUsuario)
+        {
+            return await _contextoAplicacao.Usuario
+                .AsNoTracking()
+                .Where(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower())
+                .Select(usuario => new UsuarioDTO
+                {
+                    Id = usuario.Id,
+                    NomeUsuario = usuario.NomeUsuario,
+                    NomeCompleto = usuario.NomeCompleto,
+                    Email = usuario.Email,
+                    Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<string?> VerificarConflitoAsync(string NomeUsuario, string Email)
+        {
             var UsuarioExistente = await _contextoAplicacao.Usuario
                 .AsNoTracking()
                 .FirstOrDefaultAsync(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower() || usuario.Email.ToLower() == Email.ToLower());
@@ -81,6 +99,22 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             }
 
             return "Erro desconhecido de validação";
+        }
+
+        public async Task<LoginDTO?> ObterUsuarioLoginAsync(string NomeUsuario)
+        {
+            return await _contextoAplicacao.Usuario
+                .AsNoTracking()
+                .Where(usuario => usuario.NomeUsuario.ToLower() == NomeUsuario.ToLower())
+                .Select(usuario => new LoginDTO
+                {
+                    Id = usuario.Id,
+                    NomeUsuario = usuario.NomeUsuario,
+                    Email = usuario.Email,
+                    HashSenha = usuario.HashSenha,
+                    Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

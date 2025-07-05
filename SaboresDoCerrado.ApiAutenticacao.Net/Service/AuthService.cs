@@ -1,9 +1,13 @@
 ﻿using MapsterMapper;
+using Microsoft.IdentityModel.Tokens;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.response;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
 {
@@ -58,11 +62,67 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             return usuarioDTO;
 
         }
-        public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO loginRequestDTO)
         {
-            _logger.LogInformation("Iniciando tentativa de login para o usuário {usuario}", loginRequestDTO.NomeUsuario);
-            throw new System.NotImplementedException();
+            _logger.LogInformation("Iniciando tentativa de login para o usuário [{usuario}]", loginRequestDTO.NomeUsuario);
+            var hashSenha = BCrypt.Net.BCrypt.HashPassword(loginRequestDTO.Senha);
+            _logger.LogDebug("Buscando e validando usuario no banco de dados!");
+            var loginDTO = await _userRepository.ObterUsuarioLoginAsync(loginRequestDTO.NomeUsuario);
+            //usuario nao encontrado na base
+            if (loginDTO is null)
+            {
+                var msgLogin = "Usuário [{usuario}] não existe na base!".Replace("{usuario}", loginRequestDTO.NomeUsuario);
+                _logger.LogWarning("Tentativa de login falhou: {mensagem}", msgLogin);
+                throw new InvalidOperationException(msgLogin);
+            }
+            _logger.LogDebug("Comparando senha");
+            if (!BCrypt.Net.BCrypt.Verify(loginRequestDTO.Senha, loginDTO.HashSenha))
+            {
+                return null;
+            }
+            return new LoginResponseDTO
+            {
+                Token = GerarTokenJwt(loginDTO)
+            };
         }
 
+        private string GerarTokenJwt(LoginDTO loginDto)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
+
+            var claims = new List<Claim>{
+                new Claim(JwtRegisteredClaimNames.Sub, loginDto.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Name, loginDto.NomeUsuario),
+                new Claim(JwtRegisteredClaimNames.Email, loginDto.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            if (loginDto.Perfis is not null && loginDto.Perfis.Any())
+            {
+                foreach (var usuarioPerfil in loginDto.Perfis)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, usuarioPerfil));
+                }
+            }
+
+            var credenciais = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(8),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"],
+                SigningCredentials = credenciais
+            };
+
+            var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+            _logger.LogDebug("Gerando Token");
+            var tokenString = tokenHandler.WriteToken(securityToken);
+
+            return tokenString;
+        }
     }
 }

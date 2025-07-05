@@ -1,11 +1,14 @@
 using Mapster;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Middleware;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +41,38 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
+
+// --- AUTENTICACAO ---
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    // Em produção, esta opção deve ser 'true' para forçar HTTPS.
+    options.RequireHttpsMetadata = builder.Configuration.GetValue<bool>("HttpsConfig:Enable");
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        // Valida se a chave usada para assinar o token é a mesma que a API conhece.
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"])),
+
+        // Valida se o emissor ("iss") do token é o que esperamos.
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+
+        // Valida se o destinatário ("aud") do token é o que esperamos.
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+
+        // Valida se o token não expirou.
+        ValidateLifetime = true
+    };
+});
+// ------------------------------------------------------------ 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,6 +82,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UsePathBase("/SaboresDoCerradoAuthApi");
 app.UseHealthChecks("/hc");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
