@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
@@ -56,7 +58,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         }
         public async Task<Usuario?> ObterPorIdAsync(int id)
         {
-            return await _contextoAplicacao.Usuario.FirstOrDefaultAsync(u => u.Id == id);
+            return await _contextoAplicacao.Usuario
+                .Include(usuario => usuario.UsuarioPerfil)
+                .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -136,6 +140,39 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                 );
             // Se for > 0, o usuário foi encontrado e atualizado.
             return linhasAfetadas > 0;
+        }
+        public async Task<bool> EmailExistsInAnotherUserAsync(int id, string Email) {
+            return await _contextoAplicacao.Usuario
+                .AsNoTracking()
+                .AnyAsync(
+                usuario => usuario.Email.ToLower() == Email.ToLower() && usuario.Id != id
+                );
+        }
+        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id,UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
+            var entidade = await ObterPorIdAsync(id);
+            if (entidade is null)
+            {
+                return null;
+            }
+
+            if (await EmailExistsInAnotherUserAsync(id, usuarioUpdateRequestDTO.Email))
+            {
+                var msg = "Este email já está cadastrado para outro usuário";
+                throw new InvalidOperationException(msg);
+            }
+
+            usuarioUpdateRequestDTO.Adapt(entidade);
+            entidade.DataAtualizacao = DateTime.UtcNow;
+
+            entidade.UsuarioPerfil.Clear();
+            var novosPerfis = usuarioUpdateRequestDTO.PerfilIds.Select(perfilId => new UsuarioPerfil { PerfilId = perfilId }).ToList();
+            foreach (var perfil in novosPerfis)
+            {
+                entidade.UsuarioPerfil.Add(perfil);
+            }
+
+            await _contextoAplicacao.SaveChangesAsync();
+            return await ObterPorIdNoTrackAsync(id);
         }
     }
 }

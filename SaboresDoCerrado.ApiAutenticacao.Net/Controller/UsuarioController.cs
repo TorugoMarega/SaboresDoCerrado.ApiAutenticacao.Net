@@ -30,7 +30,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         public async Task<IActionResult> ObterPorId(int id)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para inativar usuário ID: {UsuarioId}", id);
+            _logger.LogInformation("Requisição recebida para inativar usuário ID: [{UsuarioId}]", id);
 
                 var usuario = await _userService.ObterPorIdAsync(id);
                 stopwatch.Stop();
@@ -88,28 +88,50 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                 );
             return NoContent();
         }
-        public async Task<IActionResult> UpdateUsuarioPorId(UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUsuarioPorId(int id, [FromBody] UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar usuário ID: {UsuarioId}", id);
+            _logger.LogInformation("Requisição recebida para atualizar usuário ID: [{UsuarioId}]", id);
 
             try
             {
-                var usuarioAtualizado = await _userService.UpdateUsuarioPorId(id, dto);
+                var usuarioAtualizado = await _userService.UpdateUsuarioPorId(id, usuarioUpdateRequestDTO);
 
                 if (usuarioAtualizado is null)
                 {
-                    return NotFound(); // Retorna 404 se o usuário não foi encontrado pelo serviço.
+                    _logger.LogWarning(
+                    "Tentativa de atualizar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    id,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    404,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                    return NotFound();
                 }
 
                 stopwatch.Stop();
-                _logger.LogInformation("Requisição PUT /api/usuario/{UsuarioId} finalizada com sucesso em {Duracao}ms.", id, stopwatch.ElapsedMilliseconds);
-
-                // Para PUT, a resposta padrão é 200 OK com o recurso atualizado.
+                _logger.LogInformation(
+                    "Usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    id,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    200,
+                    stopwatch.ElapsedMilliseconds
+                    );
                 return Ok(usuarioAtualizado);
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message }); // Retorna 400 em caso de erro de negócio
+                _logger.LogInformation(
+               "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+               ex.Message,
+               HttpContext.Request.Method,
+               HttpContext.Request.Path,
+               400,
+               stopwatch.ElapsedMilliseconds
+               );
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

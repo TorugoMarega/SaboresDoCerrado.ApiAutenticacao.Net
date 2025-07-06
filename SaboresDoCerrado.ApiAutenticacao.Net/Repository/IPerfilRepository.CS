@@ -6,5 +6,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
     {
         Task<IEnumerable<PerfilDTO>> ObterTodosAsync();
         Task<PerfilDTO?> ObterPorIdAsync(int id);
+        Task<int> ContarPerfisExistentesAsync(List<int> perfilIds);
     }
 }

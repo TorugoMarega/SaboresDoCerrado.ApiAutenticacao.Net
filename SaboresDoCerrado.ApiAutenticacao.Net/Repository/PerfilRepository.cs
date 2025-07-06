@@ -44,5 +44,18 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                 .FirstOrDefaultAsync();
             return perfil;
         }
+
+        public async Task<int> ContarPerfisExistentesAsync(List<int> perfilIds) {
+            if (perfilIds == null || perfilIds.Count == 0)
+            {
+                return 0;
+            }
+
+            // Conta quantos dos IDs fornecidos existem na tabela de Perfis.
+            return await _contexto.Perfil
+                .AsNoTracking()
+                .CountAsync(p => perfilIds.Contains(p.Id));
+
+        }
     }
 }

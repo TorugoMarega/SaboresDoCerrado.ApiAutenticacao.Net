@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.response;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
@@ -14,13 +15,15 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
     public class AuthService : IAuthService
     {
         private readonly IUsuarioRepository _userRepository;
+        private readonly IPerfilRepository _perfilRepository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly IMapper _mapper;
 
-        public AuthService(IUsuarioRepository userRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
+        public AuthService(IUsuarioRepository userRepository, IPerfilRepository perfilRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
         {
             _userRepository = userRepository;
+            _perfilRepository = perfilRepository;
             _configuration = configuration;
             _logger = logger;
             _mapper = mapper;
@@ -34,6 +37,12 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             {
                 _logger.LogWarning("Tentativa de registro falhou: {mensagem}", msgConflito);
                 throw new InvalidOperationException(msgConflito);
+            }
+            var perfisExistentesCount = await _perfilRepository.ContarPerfisExistentesAsync(registroRequestDTO.PerfilIds);
+            if (perfisExistentesCount != registroRequestDTO.PerfilIds.Count)
+            {
+                _logger.LogWarning("Tentativa de registro com um ou mais IDs de perfil inválidos.");
+                throw new InvalidOperationException("Um ou mais perfis fornecidos são inválidos.");
             }
             //caso nao exista
             _logger.LogInformation("Validações de unicidade aprovadas para [{Email}/{NomeUsuario}]", registroRequestDTO.Email, registroRequestDTO.NomeUsuario);
