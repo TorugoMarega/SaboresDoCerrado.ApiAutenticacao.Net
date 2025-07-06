@@ -53,7 +53,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             _logger.LogDebug("Tentando persistir usuario");
             var usuarioSalvo = _userRepository.RegistrarUsuarioAsync(usuarioEntidade);
             _logger.LogDebug("Usuario persistido com sucesso, ID: [{id}]", usuarioSalvo.Result.Id);
-            var usuarioDTO = await _userRepository.ObterPorIdAsync(usuarioSalvo.Result.Id);
+            var usuarioDTO = await _userRepository.ObterPorIdNoTrackAsync(usuarioSalvo.Result.Id);
             if (usuarioDTO is null)
             {
                 // Se chegarmos aqui, algo muito errado aconteceu.

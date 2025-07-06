@@ -7,11 +7,13 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
     {
         Task<Usuario> RegistrarUsuarioAsync(Usuario usuario);
         Task<IEnumerable<UsuarioDTO>> ObterTodosAsync();
-        Task<UsuarioDTO?> ObterPorIdAsync(int id);
+        Task<UsuarioDTO?> ObterPorIdNoTrackAsync(int id);
+        Task<Usuario?> ObterPorIdAsync(int id);
         Task<UsuarioDTO?> ObterUsuarioPorNomeUsuarioAsync(string NomeUsuario);
         Task<bool> EmailExistsAsync(string email);
         Task<bool> NomeUsuarioExistsAsync(string NomeUsuario);
         Task<string?> VerificarConflitoAsync(string NomeUsuario, string Email);
         Task<LoginDTO?> ObterUsuarioLoginAsync(string NomeUsuario);
+        Task<bool> InativarAivarUsuarioAsync(int id, bool status);
     }
 }

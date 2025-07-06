@@ -25,6 +25,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         public async Task<IEnumerable<UsuarioDTO>> ObterTodosAsync()
         {
             return await _contextoAplicacao.Usuario
+                   .AsNoTracking()
                    .Select(usuario => new UsuarioDTO
                    {
                        Id = usuario.Id,
@@ -37,7 +38,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                    .ToListAsync();
         }
 
-        public async Task<UsuarioDTO?> ObterPorIdAsync(int id)
+        public async Task<UsuarioDTO?> ObterPorIdNoTrackAsync(int id)
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
@@ -52,6 +53,10 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                     Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })
                 .FirstOrDefaultAsync();
+        }
+        public async Task<Usuario?> ObterPorIdAsync(int id)
+        {
+            return await _contextoAplicacao.Usuario.FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<bool> EmailExistsAsync(string email)
@@ -119,6 +124,18 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                     Perfis = usuario.UsuarioPerfil.Select(up => up.Perfil.Nome).ToList()
                 })
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> InativarAivarUsuarioAsync(int id, bool status)
+        {
+            var linhasAfetadas = await _contextoAplicacao.Usuario
+                .Where(usuario => usuario.Id == id)
+                .ExecuteUpdateAsync(update => update
+                .SetProperty(usuario => usuario.IsAtivo, status)
+                .SetProperty(usuario => usuario.DataAtualizacao, DateTime.UtcNow)
+                );
+            // Se for > 0, o usuário foi encontrado e atualizado.
+            return linhasAfetadas > 0;
         }
     }
 }
