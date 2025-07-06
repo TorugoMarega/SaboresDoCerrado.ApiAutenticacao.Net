@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Diagnostics;
@@ -26,7 +27,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return Ok(usuarios);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "ObterPorId")]
         public async Task<IActionResult> ObterPorId(int id)
         {
             var stopwatch = Stopwatch.StartNew();

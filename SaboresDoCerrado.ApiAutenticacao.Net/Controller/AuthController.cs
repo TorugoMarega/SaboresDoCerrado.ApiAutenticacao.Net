@@ -20,7 +20,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
         [HttpPost("register")]
         //[Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> CadastrarUsuarioAsync(RegistroRequestDTO registroRequestDTO)
+        public async Task<IActionResult> CadastrarUsuarioAsync([FromBody] RegistroRequestDTO registroRequestDTO)
         {
             _logger.LogInformation("Requisição recebida para cadastro do usuario [{usuario}].", registroRequestDTO.NomeUsuario);
             var stopwatch = Stopwatch.StartNew();
@@ -36,7 +36,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                201,
                stopwatch.ElapsedMilliseconds
                );
-                return CreatedAtAction(nameof(UsuarioController.ObterPorId), "Usuario", new { id = usuarioCadastrado.Id }, usuarioCadastrado); ;
+                return CreatedAtAction(nameof(UsuarioController.ObterPorId), "Usuario", new { id = usuarioCadastrado.Id }, usuarioCadastrado);
             }
             catch (InvalidOperationException ex)
             {

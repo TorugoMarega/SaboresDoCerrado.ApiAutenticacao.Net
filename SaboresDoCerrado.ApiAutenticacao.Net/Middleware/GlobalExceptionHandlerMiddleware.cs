@@ -28,7 +28,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Middleware
                 var response = new
                 {
                     StatusCode = context.Response.StatusCode,
-                    Message = "Ocorreu um erro interno no servidor. Por favor, contate o suporte."
+                    Message = "Ocorreu um erro interno no servidor. Por favor, entre em contato com o suporte."
                 };
 
                 var jsonResponse = JsonSerializer.Serialize(response);
