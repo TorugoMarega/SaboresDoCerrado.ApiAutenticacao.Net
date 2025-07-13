@@ -27,7 +27,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         }
         public async Task<PerfilDTO> ObterPorIdAsync(int id)
         {
-            var perfilEntidade = await _perfilRepository.ObterPorIdAsync(id);
+            var perfilEntidade = await _perfilRepository.ObterPorIdNoTrackingAsync(id);
             if (perfilEntidade == null)
             {
                 return null;
@@ -35,9 +35,16 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             var perfilDto = perfilEntidade.Adapt<PerfilDTO>();
             return perfilDto;
         }
-        public async Task<PerfilDTO> UpdatePerfilPorIdAsync(int id, PerfilDTO perfilUpdateRequestDTO)
+        public async Task<PerfilDTO?> UpdatePerfilPorIdAsync(int id, UpdatePerfilRequestDTO perfilUpdateRequestDTO)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Tentando atualizar o perfil [{id}]", id);
+            var entidade = await _perfilRepository.UpdatePorIdAsync(id, perfilUpdateRequestDTO);
+            if (entidade is not null)
+            {
+                var perfilDto = entidade.Adapt<PerfilDTO>();
+                return perfilDto;
+            }
+            return null;
         }
         public async Task<bool?> InativarAtivarPerfilAsync(int id, bool novoStatus)
         {

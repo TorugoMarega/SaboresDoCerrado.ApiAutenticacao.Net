@@ -69,30 +69,45 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         public async Task<IActionResult> PostPerfilAsync([FromBody] PostPerfilRequestDTO cadastroPerfilRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para cadastrar perfil: [{perfil}].", cadastroPerfilRequestDTO.Nome);
+            try {
+                
+                _logger.LogInformation("Requisição recebida para cadastrar perfil: [{perfil}].", cadastroPerfilRequestDTO.Nome);
 
-            var perfilCadastrado = await _perfilService.CadastraPerfilAsync(cadastroPerfilRequestDTO);
-            if (perfilCadastrado is not null)
-            {
+                var perfilCadastrado = await _perfilService.CadastraPerfilAsync(cadastroPerfilRequestDTO);
+                if (perfilCadastrado is not null)
+                {
+                    stopwatch.Stop();
+                    _logger.LogInformation(
+                    "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                     HttpContext.Request.Method,
+                     HttpContext.Request.Path,
+                    201,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                    return CreatedAtRoute("GetPerfilPorIdAsync", new { id = perfilCadastrado.Id }, perfilCadastrado);
+                }
                 stopwatch.Stop();
-                _logger.LogInformation(
-                "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                 HttpContext.Request.Method,
-                 HttpContext.Request.Path,
-                201,
-                stopwatch.ElapsedMilliseconds
-                );
-                return CreatedAtRoute("GetPerfilPorIdAsync", new { id = perfilCadastrado.Id }, perfilCadastrado);
+                _logger.LogWarning(
+                    "Tentativa de cadastrar perfil finalizada sem sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    400,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                return BadRequest(new { mensagem = "Tentativa de cadastrar perfil finalizada sem sucesso" });
             }
-            stopwatch.Stop();
-            _logger.LogWarning(
-                "Tentativa de cadastrar perfil finalizada sem sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                HttpContext.Request.Method,
-                HttpContext.Request.Path,
-                400,
-                stopwatch.ElapsedMilliseconds
-                );
-            return BadRequest(new { mensagem = "Tentativa de cadastrar perfil finalizada sem sucesso" });
+            catch (InvalidOperationException ex) {
+                stopwatch.Stop();
+                _logger.LogWarning(
+                    "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    ex.GetBaseException().Message,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    400,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                return BadRequest(new { mensagem = ex.GetBaseException().Message });
+            }
         }
 
         [HttpDelete("{id}")]
@@ -129,7 +144,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                     400,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = "O perfil [{id}] já está inativo".Replace("{id}", id.ToString()) });
+                return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo"});
             }
 
             stopwatch.Stop();
@@ -144,7 +159,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return NoContent();
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePerfilPorIdAsync(int id, [FromBody] PerfilDTO perfilUpdateRequestDTO)
+        public async Task<IActionResult> UpdatePerfilPorIdAsync(int id, [FromBody] UpdatePerfilRequestDTO perfilUpdateRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para atualizar usuário ID: [{PerfilId}]", id);

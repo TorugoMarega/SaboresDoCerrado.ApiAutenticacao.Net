@@ -80,13 +80,13 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             //usuario nao encontrado na base
             if (loginDTO is null)
             {
-                var msgLogin = "Usuário [{usuario}] não existe na base!".Replace("{usuario}", loginRequestDTO.NomeUsuario);
+                var msgLogin = $"Usuário [{loginRequestDTO.NomeUsuario}] não existe na base!";
                 _logger.LogWarning("Tentativa de login falhou: {mensagem}", msgLogin);
                 throw new InvalidOperationException(msgLogin);
             }
             if (loginDTO.IsAtivo is false)
             {
-                var msgLogin = "Usuário [{usuario}] está inativo, por favor entre em contato com um Administrador!".Replace("{usuario}", loginRequestDTO.NomeUsuario);
+                var msgLogin = $"Usuário [{loginRequestDTO.NomeUsuario}] está inativo, por favor entre em contato com um Administrador!";
                 _logger.LogWarning("Tentativa de login falhou: {mensagem}", msgLogin);
                 throw new InvalidOperationException(msgLogin);
             }

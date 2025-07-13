@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
@@ -31,7 +33,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             return perfis;
         }
 
-        public async Task<PerfilDTO?> ObterPorIdAsync(int id)
+        public async Task<PerfilDTO?> ObterPorIdNoTrackingAsync(int id)
         {
             _logger.LogInformation("Iniciando busca do perfil por ID {perfilID} no banco de dados", id);
             var perfil = await _contexto.Perfil
@@ -44,6 +46,14 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                     Nome = perfil.Nome,
                     Status = perfil.Status
                 })
+                .FirstOrDefaultAsync();
+            return perfil;
+        }
+        public async Task<Perfil?> ObterPorIdAsync(int id)
+        {
+            _logger.LogInformation("Iniciando busca do perfil por ID {perfilID} no banco de dados", id);
+            var perfil = await _contexto.Perfil
+                .Where(perfil => perfil.Id == id)
                 .FirstOrDefaultAsync();
             return perfil;
         }
@@ -61,9 +71,31 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                 .CountAsync(p => perfilIds.Contains(p.Id));
 
         }
-        public async Task<Perfil?> UpdatePerfilPorIdAsync(int id, Perfil perfil)
+        public async Task<bool> ExistsByNomeAsync(string Nome, int? idAExcluir = null)
         {
-            throw new NotImplementedException();
+            IQueryable<Perfil> query = _contexto.Perfil.AsNoTracking();
+            query = query.Where(p => p.Nome.ToLower() == Nome.ToLower());
+            //caso seja passado um id, ele sera excluido da query 
+            if (idAExcluir.HasValue)
+            {
+                query = query.Where(p => p.Id != idAExcluir.Value);
+            }
+            return await query.AnyAsync();
+        }
+        public async Task<Perfil?> UpdatePorIdAsync(int id, UpdatePerfilRequestDTO perfilDTO)
+        {
+            var entidade = await ObterPorIdAsync(id);
+            if (entidade is null)
+            {
+                return null;
+            }
+            if (await ExistsByNomeAsync(perfilDTO.Nome, id))
+            {
+                throw new InvalidOperationException($"Há um perfil em uso com o nome [{perfilDTO.Nome}]");
+            }
+            perfilDTO.Adapt(entidade);
+            await _contexto.SaveChangesAsync();
+            return entidade;    
         }
         public async Task<bool?> InativarAtivarPerfilAsync(int id, bool novoStatus)
         {
@@ -78,8 +110,12 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             }
             else return null;
         }
-        public async Task<Perfil> CadastraPerfilAsync(Perfil perfil)
+        public async Task<Perfil?> CadastraPerfilAsync(Perfil perfil)
         {
+            if (await ExistsByNomeAsync(perfil.Nome))
+            {
+                throw new InvalidOperationException($"Há um perfil em uso com o nome [{perfil.Nome}]");
+            }
             await _contexto.AddAsync(perfil);
             await _contexto.SaveChangesAsync();
             return perfil;
