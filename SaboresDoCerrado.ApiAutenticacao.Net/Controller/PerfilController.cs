@@ -95,25 +95,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return BadRequest(new { mensagem = "Tentativa de cadastrar perfil finalizada sem sucesso" });
         }
 
-        [HttpPut("{id}")]
-        //[Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> UpdatePerfilAsync(int id, [FromBody] PerfilDTO cadastroPerfilRequestDTO)
-        {
-            var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar o perfil: [{perfil}].", id);
-            _logger.LogInformation(
-            "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-             HttpContext.Request.Method,
-             HttpContext.Request.Path,
-            200,
-            stopwatch.ElapsedMilliseconds
-            );
-
-            cadastroPerfilRequestDTO.Id = 1;
-            var perfilAtualizado = cadastroPerfilRequestDTO;
-
-            return Ok(perfilAtualizado);
-        }
         [HttpDelete("{id}")]
         //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> InativarPorId(int id)
