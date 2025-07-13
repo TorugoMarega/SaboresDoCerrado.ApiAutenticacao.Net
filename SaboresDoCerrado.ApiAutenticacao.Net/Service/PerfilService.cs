@@ -1,5 +1,7 @@
 ﻿using Mapster;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
@@ -23,7 +25,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             var perfisEntidade = await _perfilRepository.ObterTodosAsync();
             return perfisEntidade.Adapt<IEnumerable<PerfilDTO>>();
         }
-        public async Task<PerfilDTO> ObterPorId(int id)
+        public async Task<PerfilDTO> ObterPorIdAsync(int id)
         {
             var perfilEntidade = await _perfilRepository.ObterPorIdAsync(id);
             if (perfilEntidade == null)
@@ -33,6 +35,28 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             var perfilDto = perfilEntidade.Adapt<PerfilDTO>();
             return perfilDto;
         }
-
+        public async Task<PerfilDTO> UpdatePerfilPorIdAsync(int id, PerfilDTO perfilUpdateRequestDTO)
+        {
+            throw new NotImplementedException();
+        }
+        public async Task<bool?> InativarAtivarPerfilAsync(int id, bool novoStatus)
+        {
+            _logger.LogInformation("Tentando atualizar o status do perfil [{id}], para o status: [{status}]", id, novoStatus);
+            var sucesso = await _perfilRepository.InativarAtivarPerfilAsync(id, novoStatus);
+            if (sucesso is null) _logger.LogWarning("Perfil [{id}] não encontrado!", id);
+            if (sucesso.Equals(false)) _logger.LogWarning("O perfil [{id}] já está no status: [{novoStatus}]", id, novoStatus);
+            return sucesso;
+        }
+        public async Task<PerfilDTO> CadastraPerfilAsync(PostPerfilRequestDTO perfilRequestDTO)
+        {
+            var perfil = new Perfil
+            {
+                Nome = perfilRequestDTO.Nome,
+                Descricao = perfilRequestDTO.Descricao,
+                Status = true
+            };
+            var novaEntidade = await _perfilRepository.CadastraPerfilAsync(perfil);
+            return novaEntidade.Adapt(new PerfilDTO());
+        }
     }
 }

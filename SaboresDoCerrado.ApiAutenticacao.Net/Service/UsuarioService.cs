@@ -1,5 +1,4 @@
 ﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 
@@ -35,7 +34,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             _logger.LogInformation("Executando regra de negócio para {Acao} do usuário ID: [{UsuarioId}]", acao, id);
             return await _usuarioRepository.InativarAivarUsuarioAsync(id, novoStatus);
         }
-        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
+        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
+        {
             var perfisExistentesCount = await _perfilRepository.ContarPerfisExistentesAsync(usuarioUpdateRequestDTO.PerfilIds);
             if (perfisExistentesCount != usuarioUpdateRequestDTO.PerfilIds.Count)
             {

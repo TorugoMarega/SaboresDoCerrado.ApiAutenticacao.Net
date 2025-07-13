@@ -141,14 +141,16 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             // Se for > 0, o usuário foi encontrado e atualizado.
             return linhasAfetadas > 0;
         }
-        public async Task<bool> EmailExistsInAnotherUserAsync(int id, string Email) {
+        public async Task<bool> EmailExistsInAnotherUserAsync(int id, string Email)
+        {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
                 .AnyAsync(
                 usuario => usuario.Email.ToLower() == Email.ToLower() && usuario.Id != id
                 );
         }
-        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id,UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
+        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
+        {
             var entidade = await ObterPorIdAsync(id);
             if (entidade is null)
             {

@@ -5,7 +5,7 @@
         public int Id { get; set; }
         public required string Nome { get; set; }
         public required string Descricao { get; set; }
-
-        public ICollection<UsuarioPerfil> UsuarioPerfil { get; set; }
+        public required bool Status { get; set; }
+        public ICollection<UsuarioPerfil>? UsuarioPerfil { get; set; }
     }
 }

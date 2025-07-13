@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Diagnostics;
@@ -33,28 +31,28 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para inativar usuário ID: [{UsuarioId}]", id);
 
-                var usuario = await _userService.ObterPorIdAsync(id);
-                stopwatch.Stop();
-                if (usuario is null)
-                {
-                    _logger.LogWarning(
-                   "Usuário não encontrado na base: [{id}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                   id,
-                   HttpContext.Request.Method,
-                   HttpContext.Request.Path,
-                   404,
-                   stopwatch.ElapsedMilliseconds
-                   );
-                    return NotFound();
-                }
-                _logger.LogInformation(
-                    "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    HttpContext.Request.Method,
-                    HttpContext.Request.Path,
-                    200,
-                    stopwatch.ElapsedMilliseconds
-                    );
-                return Ok(usuario);
+            var usuario = await _userService.ObterPorIdAsync(id);
+            stopwatch.Stop();
+            if (usuario is null)
+            {
+                _logger.LogWarning(
+               "Usuário não encontrado na base: [{id}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+               id,
+               HttpContext.Request.Method,
+               HttpContext.Request.Path,
+               404,
+               stopwatch.ElapsedMilliseconds
+               );
+                return NotFound();
+            }
+            _logger.LogInformation(
+                "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                HttpContext.Request.Method,
+                HttpContext.Request.Path,
+                200,
+                stopwatch.ElapsedMilliseconds
+                );
+            return Ok(usuario);
         }
         [HttpDelete("{id}")]
         //[Authorize(Roles = "Administrador")]
@@ -90,7 +88,8 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return NoContent();
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUsuarioPorId(int id, [FromBody] UsuarioUpdateRequestDTO usuarioUpdateRequestDTO) {
+        public async Task<IActionResult> UpdateUsuarioPorId(int id, [FromBody] UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
+        {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para atualizar usuário ID: [{UsuarioId}]", id);
 

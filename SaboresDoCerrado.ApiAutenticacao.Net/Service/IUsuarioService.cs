@@ -8,6 +8,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         Task<IEnumerable<UsuarioDTO>> ObterTodosAsync();
         Task<UsuarioDTO?> ObterPorIdAsync(int id);
         Task<bool> InativarAtivarUsuarioAsync(int id, bool status);
-        Task<UsuarioDTO?> UpdateUsuarioPorId(int id,UsuarioUpdateRequestDTO usuarioUpdateRequestDTO);
+        Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO);
     }
 }
