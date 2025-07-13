@@ -1,5 +1,5 @@
 ﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.response;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Service

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request
+namespace SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario
 {
     public class RegistroRequestDTO
     {

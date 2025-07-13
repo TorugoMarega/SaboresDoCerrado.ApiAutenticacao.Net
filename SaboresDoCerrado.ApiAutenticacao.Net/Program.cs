@@ -7,6 +7,7 @@ using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Middleware;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
 
@@ -43,6 +44,7 @@ builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
 // --- AUTENTICACAO ---
+// Limpa o mapa de claims padrão para usar os nomes originais do JWT ("sub", "role", etc.)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -50,7 +52,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    // Em produção, esta opção deve ser 'true' para forçar HTTPS.
+    // Em produção, esta opção deve ser 'true' para forçar HTTPS. Altere no config da aplicação
     options.RequireHttpsMetadata = builder.Configuration.GetValue<bool>("HttpsConfig:Enable");
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -70,6 +72,56 @@ builder.Services.AddAuthentication(options =>
         // Valida se o token não expirou.
         ValidateLifetime = true
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        // O evento OnChallenge é disparado quando uma autorização falha. Vamos adicionar uma mensagem customizada
+        OnChallenge = context =>
+        {
+            // O HandleResponse() impede que a resposta padrão seja enviada.
+            context.HandleResponse();
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+
+            if (string.IsNullOrEmpty(context.Error))
+            {
+                context.Error = "Unauthorized";
+            }
+            if (string.IsNullOrEmpty(context.ErrorDescription))
+            {
+                context.ErrorDescription = "Você precisa de um token de autenticação válido para acessar este recurso.";
+            }
+
+            var response = new
+            {
+                statusCode = context.Response.StatusCode,
+                message = context.ErrorDescription
+            };
+
+            return context.Response.WriteAsJsonAsync(response);
+        }
+    };
+
+    /* VALIDADOR DE TOKEN
+    options.Events = new JwtBearerEvents
+    {
+        // Este evento é chamado SE o token for validado com sucesso.
+        OnTokenValidated = context =>
+        {
+            // Pegamos o logger para registrar o sucesso.
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Token validado com sucesso. Claims presentes: {Claims}", context.Principal.Claims.Select(c => $"{c.Type}: {c.Value}"));
+            return Task.CompletedTask;
+        },
+        // Este evento é chamado SE a autenticação falhar POR QUALQUER MOTIVO.
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            // Logamos a EXCEÇÃO COMPLETA, que nos dirá o motivo exato da falha.
+            logger.LogError(context.Exception, "Falha na autenticação do token.");
+            return Task.CompletedTask;
+        }
+    };*/
 });
 // ------------------------------------------------------------ 
 

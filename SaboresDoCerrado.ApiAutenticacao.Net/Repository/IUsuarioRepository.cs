@@ -1,5 +1,5 @@
 ﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
@@ -18,5 +18,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
         Task<bool> InativarAivarUsuarioAsync(int id, bool status);
         Task<bool> EmailExistsInAnotherUserAsync(int id, string Email);
         Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO);
+        Task UpdateSenhaUsuarioPorIdAsync(Usuario usuario);
     }
 }

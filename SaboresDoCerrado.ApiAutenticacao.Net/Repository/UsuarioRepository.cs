@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SaboresDoCerrado.ApiAutenticacao.Net.Data;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
@@ -175,6 +175,10 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
 
             await _contextoAplicacao.SaveChangesAsync();
             return await ObterPorIdNoTrackAsync(id);
+        }
+        public async Task UpdateSenhaUsuarioPorIdAsync(Usuario usuario) {
+            _contextoAplicacao.Usuario.Update(usuario);
+            await _contextoAplicacao.SaveChangesAsync();
         }
     }
 }

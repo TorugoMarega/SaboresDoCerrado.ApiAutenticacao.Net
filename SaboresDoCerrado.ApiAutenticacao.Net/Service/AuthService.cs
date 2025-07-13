@@ -1,7 +1,7 @@
 ﻿using MapsterMapper;
 using Microsoft.IdentityModel.Tokens;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.response;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;

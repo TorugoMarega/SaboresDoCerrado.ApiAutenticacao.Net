@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
-using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Diagnostics;
 
@@ -145,7 +145,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                     400,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo"});
+                return BadRequest(new {mensagem = $"O perfil [{id}] já está inativo"});
             }
 
             stopwatch.Stop();
