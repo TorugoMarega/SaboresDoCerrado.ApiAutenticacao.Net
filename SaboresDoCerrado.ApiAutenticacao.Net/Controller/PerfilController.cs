@@ -43,9 +43,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para buscar perfil por ID: [{ID}].", id);
             var perfil = await _perfilService.ObterPorIdAsync(id);
-            stopwatch.Stop();
             if (perfil is null)
             {
+                stopwatch.Stop();
                 _logger.LogWarning(
                     "Perfil não encontrado. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     HttpContext.Request.Method,
@@ -55,6 +55,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                 );
                 return NotFound();
             }
+            stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                 HttpContext.Request.Method,
@@ -170,6 +171,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 
                 if (perfilAtualizado is null)
                 {
+                    stopwatch.Stop();
                     _logger.LogWarning(
                     "Tentativa de atualizar perfil não existente ID: [{PerfilId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
@@ -194,6 +196,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             }
             catch (InvalidOperationException ex)
             {
+                stopwatch.Stop();
                 _logger.LogInformation(
                "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                ex.Message,

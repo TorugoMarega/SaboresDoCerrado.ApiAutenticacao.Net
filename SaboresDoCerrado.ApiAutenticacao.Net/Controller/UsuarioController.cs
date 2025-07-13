@@ -21,7 +21,16 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         [HttpGet("listar")]
         public async Task<IActionResult> ObterTodosUsuarios()
         {
+            var stopwatch = Stopwatch.StartNew();
+            _logger.LogInformation("Requisição recebida para listar todos os usuários");
             var usuarios = await _userService.ObterTodosAsync();
+            _logger.LogInformation(
+               "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+               HttpContext.Request.Method,
+               HttpContext.Request.Path,
+               200,
+               stopwatch.ElapsedMilliseconds
+            );
             return Ok(usuarios);
         }
 
@@ -32,9 +41,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             _logger.LogInformation("Requisição recebida para inativar usuário ID: [{UsuarioId}]", id);
 
             var usuario = await _userService.ObterPorIdAsync(id);
-            stopwatch.Stop();
             if (usuario is null)
             {
+                stopwatch.Stop();
                 _logger.LogWarning(
                "Usuário não encontrado na base: [{id}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                id,
@@ -45,6 +54,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                );
                 return NotFound();
             }
+            stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                 HttpContext.Request.Method,
@@ -65,6 +75,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 
             if (!sucesso)
             {
+                stopwatch.Stop();
                 _logger.LogWarning(
                     "Tentativa de inativar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
@@ -99,6 +110,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 
                 if (usuarioAtualizado is null)
                 {
+                    stopwatch.Stop();
                     _logger.LogWarning(
                     "Tentativa de atualizar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
@@ -123,6 +135,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             }
             catch (InvalidOperationException ex)
             {
+                stopwatch.Stop();
                 _logger.LogInformation(
                "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                ex.Message,

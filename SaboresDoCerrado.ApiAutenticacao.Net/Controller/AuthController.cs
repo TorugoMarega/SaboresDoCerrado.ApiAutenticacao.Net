@@ -40,6 +40,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             }
             catch (InvalidOperationException ex)
             {
+                stopwatch.Stop();
                 _logger.LogWarning(
                        "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                        ex.Message,
@@ -62,9 +63,10 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             {
 
                 var token = await _authService.LoginAsync(loginRequestDTO);
-                stopwatch.Stop();
+                
                 if (token is not null)
                 {
+                    stopwatch.Stop();
                     _logger.LogInformation(
                   "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                   HttpContext.Request.Method,
@@ -74,11 +76,13 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                   );
                     return Ok(token);
                 }
+                stopwatch.Stop();
                 _logger.LogWarning("Falha na autenticação para {NomeUsuario}. Retornando 401 Unauthorized em {Duration}ms.", loginRequestDTO.NomeUsuario, stopwatch.ElapsedMilliseconds);
                 return Unauthorized(new { message = "Usuário e/ou senha inválidos." });
             }
             catch (InvalidOperationException ex)
             {
+                stopwatch.Stop();
                 _logger.LogWarning(
                        "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                        ex.Message,
