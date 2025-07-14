@@ -46,7 +46,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         public async Task<IActionResult> ObterPorId(int id)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para inativar usuário ID: [{UsuarioId}]", id);
+            _logger.LogInformation("Requisição recebida para buscar usuário ID: [{UsuarioId}]", id);
 
             var usuario = await _userService.ObterPorIdNoTrackAsync(id);
             if (usuario is null)
