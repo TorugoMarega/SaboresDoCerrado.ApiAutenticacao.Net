@@ -27,7 +27,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 
         [HttpGet("listar")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> ObterTodosUsuarios()
+        public async Task<IActionResult> ObterTodosUsuariosAsync()
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todos os usuários");
@@ -43,11 +43,35 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet("{id}", Name = "ObterPorId")]
-        public async Task<IActionResult> ObterPorId(int id)
+        public async Task<IActionResult> ObterUsuarioPorIdAsync(int id)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para buscar usuário ID: [{UsuarioId}]", id);
+            
+            var idUsuarioLogadoString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (idUsuarioLogadoString is null)
+            {
+                stopwatch.Stop();
+                _logger.LogWarning(
+                    "Falha ao obter ID do usuário logado. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    400,
+                    stopwatch.ElapsedMilliseconds
+                );
+                return BadRequest(new { statusCode = 400, message = "Falha ao obter ID do usuário logado." });
+            }
+            var idUsuarioLogado = int.Parse(idUsuarioLogadoString);
+            var isAdmin = User.IsInRole("Administrador") || User.IsInRole("Gerente de Produção");
 
+            if (idUsuarioLogado != id && !isAdmin)
+            {
+                _logger.LogWarning(
+                    "Acesso negado: Usuário [{IdUsuarioLogado}] tentou acessar os dados do usuário [{IdAlvo}] sem permissão.",
+                    idUsuarioLogado, id);
+                return Forbid();
+            }
+            _logger.LogInformation("Usuário [{IdUsuarioLogado}] autorizado a acessar dados do usuário [{IdAlvo}].", idUsuarioLogado, id);
             var usuario = await _userService.ObterPorIdNoTrackAsync(id);
             if (usuario is null)
             {
@@ -74,7 +98,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
         [HttpDelete("{id}")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> InativarPorId(int id)
+        public async Task<IActionResult> InativarPorIdAsync(int id)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para INATIVAR usuário ID: [{UsuarioId}]", id);

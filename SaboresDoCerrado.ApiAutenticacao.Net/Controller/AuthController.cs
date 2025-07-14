@@ -37,7 +37,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                201,
                stopwatch.ElapsedMilliseconds
                );
-                return CreatedAtAction(nameof(UsuarioController.ObterPorId), "Usuario", new { id = usuarioCadastrado.Id }, usuarioCadastrado);
+                return CreatedAtAction(nameof(UsuarioController.ObterUsuarioPorIdAsync), "Usuario", new { id = usuarioCadastrado.Id }, usuarioCadastrado);
             }
             catch (InvalidOperationException ex)
             {
