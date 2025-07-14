@@ -21,7 +21,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet("listar")]
-        //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetPerfisAsync()
         {
             var stopwatch = Stopwatch.StartNew();
@@ -39,7 +38,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet("{id}", Name = "GetPerfilPorIdAsync")]
-        //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetPerfilPorIdAsync(int id)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -68,7 +66,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return Ok(perfil);
         }
         [HttpPost]
-        //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PostPerfilAsync([FromBody] PostPerfilRequestDTO cadastroPerfilRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -114,7 +111,6 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> InativarPorId(int id)
         {
             var stopwatch = Stopwatch.StartNew();
