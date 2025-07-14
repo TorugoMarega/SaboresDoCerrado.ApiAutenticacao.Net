@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Diagnostics;
@@ -11,6 +13,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 {
     [ApiController]
     [Route("usuario")]
+    [Authorize]
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _userService;
@@ -23,7 +26,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet("listar")]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> ObterTodosUsuarios()
         {
             var stopwatch = Stopwatch.StartNew();
@@ -70,7 +73,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             return Ok(usuario);
         }
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> InativarPorId(int id)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -103,21 +106,22 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                 );
             return NoContent();
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUsuarioPorId(int id, [FromBody] UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
+        [HttpPut("admin/{id}")]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> AdminAtualizarUsuarioPorIdAsync(int id, [FromBody] AdminUsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar usuário ID: [{UsuarioId}]", id);
+            _logger.LogInformation("Admin: Requisição recebida para atualizar usuário ID: [{UsuarioId}]", id);
 
             try
             {
-                var usuarioAtualizado = await _userService.UpdateUsuarioPorId(id, usuarioUpdateRequestDTO);
+                var usuarioAtualizado = await _userService.AdminAtualizarUsuarioAsync(id, usuarioUpdateRequestDTO);
 
                 if (usuarioAtualizado is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
-                    "Tentativa de atualizar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Admin: Tentativa de atualizar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -129,7 +133,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "Usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Admin Usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -152,71 +156,67 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpPut("senha/alterar")]
+        [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateSenhaUsuarioPorId([FromBody] UsuarioUpdateSenhaRequestDTO usuarioUpdateRequestDTO)
+        public async Task<IActionResult> AtualizarUsuarioPorIdAsync(int id, [FromBody] UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
+            _logger.LogInformation("Usuario: Requisição recebida para atualizar usuário ID: [{UsuarioId}]", id);
+
             try
             {
-                _logger.LogDebug("Buscando ID a partir do Header da requisicao");
-                var idUsuarioLogadoString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                _logger.LogDebug("String ID Usuario: [{id}]", idUsuarioLogadoString);
-                if (idUsuarioLogadoString is null)
-                {
-                    {
-                        stopwatch.Stop();
-                        var msg = "Token expirado ou inválido";
-                        _logger.LogWarning(
-                        "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        msg,
-                        HttpContext.Request.Method,
-                        HttpContext.Request.Path,
-                        401,
-                        stopwatch.ElapsedMilliseconds
-                        );
-                        return Unauthorized(new { statusCode = 401, message = msg });
-                    }
-                }
-                _logger.LogInformation("Requisição recebida para atualizar senha do usuário ID: [{UsuarioId}]", idUsuarioLogadoString);
-                var usuarioAtualizado = await _userService.UpdateSenhaUsuarioPorIdAsync(int.Parse(idUsuarioLogadoString), usuarioUpdateRequestDTO);
-
-                if (usuarioAtualizado.Equals(false))
+                var idUsuarioLogadoClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!int.TryParse(idUsuarioLogadoClaim, out var idUsuarioLogado))
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
-                    "Tentativa de atualizar senha de um usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    idUsuarioLogadoString,
-                    HttpContext.Request.Method,
-                    HttpContext.Request.Path,
-                    404,
-                    stopwatch.ElapsedMilliseconds
+                        "Usuario: Falha ao obter ID do usuário logado. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        HttpContext.Request.Method,
+                        HttpContext.Request.Path,
+                        400,
+                        stopwatch.ElapsedMilliseconds
+                    );
+                    return BadRequest(new { statusCode = 400,message = "Falha ao obter ID do usuário logado." });
+                }
+
+                var usuarioAtualizado = await _userService.AtualizarUsuarioAsync(idUsuarioLogado, id,usuarioUpdateRequestDTO);
+
+                if (usuarioAtualizado is null)
+                {
+                    stopwatch.Stop();
+                    _logger.LogWarning(
+                        "Usuario: Tentativa de atualizar usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        idUsuarioLogado,
+                        HttpContext.Request.Method,
+                        HttpContext.Request.Path,
+                        404,
+                        stopwatch.ElapsedMilliseconds
                     );
                     return NotFound();
                 }
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "Senha do usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    idUsuarioLogadoString,
+                    "Usuario: Usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    idUsuarioLogado,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,
                     stopwatch.ElapsedMilliseconds
-                    );
-                return Ok();
+                );
+                return Ok(usuarioAtualizado);
             }
             catch (InvalidOperationException ex)
             {
                 stopwatch.Stop();
                 _logger.LogInformation(
-               "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-               ex.Message,
-               HttpContext.Request.Method,
-               HttpContext.Request.Path,
-               400,
-               stopwatch.ElapsedMilliseconds
-               );
+                    "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    ex.Message,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    400,
+                    stopwatch.ElapsedMilliseconds
+                );
                 return BadRequest(new { statusCode = 400, message = ex.Message });
             }
         }

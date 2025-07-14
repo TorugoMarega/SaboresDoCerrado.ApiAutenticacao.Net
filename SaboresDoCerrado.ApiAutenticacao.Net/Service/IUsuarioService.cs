@@ -8,7 +8,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         Task<IEnumerable<UsuarioDTO>> ObterTodosAsync();
         Task<UsuarioDTO?> ObterPorIdNoTrackAsync(int Id);
         Task<bool> InativarAtivarUsuarioAsync(int Id, bool Status);
-        Task<UsuarioDTO?> UpdateUsuarioPorId(int Id, UsuarioUpdateRequestDTO UsuarioUpdateRequestDTO);
-        Task<bool> UpdateSenhaUsuarioPorIdAsync(int Id, UsuarioUpdateSenhaRequestDTO UsuarioUpdateSenhaRequestDTO);
+        Task<UsuarioDTO?> AdminAtualizarUsuarioAsync(int Id, AdminUsuarioUpdateRequestDTO adminUsuarioUpdateRequestDTO);
+        Task<UsuarioDTO?> AtualizarUsuarioAsync(int idUsuarioLogado, int idReq, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO);
     }
 }

@@ -24,7 +24,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             return usuario;
         }
 
-        public async Task<IEnumerable<UsuarioDTO>> ObterTodosAsync()
+        public async Task<IEnumerable<UsuarioDTO>> ObterTodosUsuariosDtoAsync()
         {
             return await _contextoAplicacao.Usuario
                    .AsNoTracking()
@@ -40,7 +40,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                    .ToListAsync();
         }
 
-        public async Task<UsuarioDTO?> ObterPorIdNoTrackAsync(int id)
+        public async Task<UsuarioDTO?> ObterUsuarioDtoPorIdAsync(int id)
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
@@ -56,7 +56,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                 })
                 .FirstOrDefaultAsync();
         }
-        public async Task<Usuario?> ObterPorIdAsync(int id)
+        public async Task<Usuario?> ObterUsuarioEntidadePorIdAsync(int id)
         {
             return await _contextoAplicacao.Usuario
                 .Include(usuario => usuario.UsuarioPerfil)
@@ -73,7 +73,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             return await _contextoAplicacao.Usuario.AnyAsync(usuario => usuario.NomeUsuario == NomeUsuario);
         }
 
-        public async Task<UsuarioDTO?> ObterUsuarioPorNomeUsuarioAsync(string NomeUsuario)
+        public async Task<UsuarioDTO?> ObterUsuarioDtoPorNomeAsync(string NomeUsuario)
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
@@ -113,7 +113,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
             return "Erro desconhecido de validação";
         }
 
-        public async Task<LoginDTO?> ObterUsuarioLoginAsync(string NomeUsuario)
+        public async Task<LoginDTO?> ObterUsuarioDtoLoginAsync(string NomeUsuario)
         {
             return await _contextoAplicacao.Usuario
                 .AsNoTracking()
@@ -149,34 +149,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Repository
                 usuario => usuario.Email.ToLower() == Email.ToLower() && usuario.Id != id
                 );
         }
-        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
-        {
-            var entidade = await ObterPorIdAsync(id);
-            if (entidade is null)
-            {
-                return null;
-            }
-
-            if (await EmailExistsInAnotherUserAsync(id, usuarioUpdateRequestDTO.Email))
-            {
-                var msg = "Este email já está cadastrado para outro usuário";
-                throw new InvalidOperationException(msg);
-            }
-
-            usuarioUpdateRequestDTO.Adapt(entidade);
-            entidade.DataAtualizacao = DateTime.UtcNow;
-
-            entidade.UsuarioPerfil.Clear();
-            var novosPerfis = usuarioUpdateRequestDTO.PerfilIds.Select(perfilId => new UsuarioPerfil { PerfilId = perfilId }).ToList();
-            foreach (var perfil in novosPerfis)
-            {
-                entidade.UsuarioPerfil.Add(perfil);
-            }
-
-            await _contextoAplicacao.SaveChangesAsync();
-            return await ObterPorIdNoTrackAsync(id);
-        }
-        public async Task UpdateSenhaUsuarioPorIdAsync(Usuario usuario) {
+        public async Task AtualizaEntidadeUsuarioAsync(Usuario usuario) {
             _contextoAplicacao.Usuario.Update(usuario);
             await _contextoAplicacao.SaveChangesAsync();
         }

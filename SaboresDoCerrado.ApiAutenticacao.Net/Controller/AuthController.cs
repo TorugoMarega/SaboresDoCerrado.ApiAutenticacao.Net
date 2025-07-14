@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 {
@@ -19,7 +20,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
             _logger = logger;
         }
         [HttpPost("register")]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> CadastrarUsuarioAsync([FromBody] RegistroRequestDTO registroRequestDTO)
         {
             _logger.LogInformation("Requisição recebida para cadastro do usuario [{usuario}].", registroRequestDTO.NomeUsuario);
@@ -94,6 +95,73 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
                 return BadRequest(new { message = ex.Message });
             }
 
+        }
+        [HttpPut("senha/alterar")]
+        public async Task<IActionResult> UpdateSenhaUsuarioPorId([FromBody] UsuarioUpdateSenhaRequestDTO usuarioUpdateRequestDTO)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
+                _logger.LogDebug("Buscando ID a partir do Header da requisicao");
+                var idUsuarioLogadoString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _logger.LogDebug("String ID Usuario: [{id}]", idUsuarioLogadoString);
+                if (idUsuarioLogadoString is null)
+                {
+                    {
+                        stopwatch.Stop();
+                        var msg = "Token expirado ou inválido";
+                        _logger.LogWarning(
+                        "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        msg,
+                        HttpContext.Request.Method,
+                        HttpContext.Request.Path,
+                        401,
+                        stopwatch.ElapsedMilliseconds
+                        );
+                        return Unauthorized(new { statusCode = 401, message = msg });
+                    }
+                }
+                _logger.LogInformation("Requisição recebida para atualizar senha do usuário ID: [{UsuarioId}]", idUsuarioLogadoString);
+                var usuarioAtualizado = await _authService.UpdateSenhaUsuarioPorIdAsync(int.Parse(idUsuarioLogadoString), usuarioUpdateRequestDTO);
+
+                if (usuarioAtualizado.Equals(false))
+                {
+                    stopwatch.Stop();
+                    _logger.LogWarning(
+                    "Tentativa de atualizar senha de um usuário não existente ID: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    idUsuarioLogadoString,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    404,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                    return NotFound();
+                }
+
+                stopwatch.Stop();
+                _logger.LogInformation(
+                    "Senha do usuário atualizado com sucesso: [{UsuarioId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    idUsuarioLogadoString,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    200,
+                    stopwatch.ElapsedMilliseconds
+                    );
+                return Ok();
+            }
+            catch (InvalidOperationException ex)
+            {
+                stopwatch.Stop();
+                _logger.LogInformation(
+               "{msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+               ex.Message,
+               HttpContext.Request.Method,
+               HttpContext.Request.Path,
+               400,
+               stopwatch.ElapsedMilliseconds
+               );
+                return BadRequest(new { statusCode = 400, message = ex.Message });
+            }
         }
     }
 }

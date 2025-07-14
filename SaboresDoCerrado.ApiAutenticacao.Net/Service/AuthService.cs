@@ -13,15 +13,15 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
 {
     public class AuthService : IAuthService
     {
-        private readonly IUsuarioRepository _userRepository;
+        private readonly IUsuarioRepository _usuarioRepository;
         private readonly IPerfilRepository _perfilRepository;
         private readonly IConfiguration _configuration;
         private readonly ILogger<AuthService> _logger;
         private readonly IMapper _mapper;
 
-        public AuthService(IUsuarioRepository userRepository, IPerfilRepository perfilRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
+        public AuthService(IUsuarioRepository usuarioRepository, IPerfilRepository perfilRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
         {
-            _userRepository = userRepository;
+            _usuarioRepository = usuarioRepository;
             _perfilRepository = perfilRepository;
             _configuration = configuration;
             _logger = logger;
@@ -31,7 +31,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         {
             _logger.LogInformation("Iniciando processo de registro para o usuário: [{usuario}]", registroRequestDTO.NomeUsuario);
             //valida existencia do email/nome de usuario
-            var msgConflito = await _userRepository.VerificarConflitoAsync(registroRequestDTO.NomeUsuario, registroRequestDTO.Email);
+            var msgConflito = await _usuarioRepository.VerificarConflitoAsync(registroRequestDTO.NomeUsuario, registroRequestDTO.Email);
             if (msgConflito is not null)
             {
                 _logger.LogWarning("Tentativa de registro falhou: {mensagem}", msgConflito);
@@ -59,9 +59,9 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
                 UsuarioPerfil = registroRequestDTO.PerfilIds.Select(pId => new UsuarioPerfil { PerfilId = pId }).ToList()
             };
             _logger.LogDebug("Tentando persistir usuario");
-            var usuarioSalvo = _userRepository.RegistrarUsuarioAsync(usuarioEntidade);
+            var usuarioSalvo = _usuarioRepository.RegistrarUsuarioAsync(usuarioEntidade);
             _logger.LogDebug("Usuario persistido com sucesso, ID: [{id}]", usuarioSalvo.Result.Id);
-            var usuarioDTO = await _userRepository.ObterPorIdNoTrackAsync(usuarioSalvo.Result.Id);
+            var usuarioDTO = await _usuarioRepository.ObterUsuarioDtoPorIdAsync(usuarioSalvo.Result.Id);
             if (usuarioDTO is null)
             {
                 // Se chegarmos aqui, algo muito errado aconteceu.
@@ -76,7 +76,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             _logger.LogInformation("Iniciando tentativa de login para o usuário [{usuario}]", loginRequestDTO.NomeUsuario);
             var hashSenha = BCrypt.Net.BCrypt.HashPassword(loginRequestDTO.Senha);
             _logger.LogDebug("Buscando e validando usuario no banco de dados!");
-            var loginDTO = await _userRepository.ObterUsuarioLoginAsync(loginRequestDTO.NomeUsuario);
+            var loginDTO = await _usuarioRepository.ObterUsuarioDtoLoginAsync(loginRequestDTO.NomeUsuario);
             //usuario nao encontrado na base
             if (loginDTO is null)
             {
@@ -100,7 +100,33 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
                 Token = GerarTokenJwt(loginDTO)
             };
         }
+        public async Task<bool> UpdateSenhaUsuarioPorIdAsync(int Id, UsuarioUpdateSenhaRequestDTO UsuarioUpdateSenhaRequestDTO)
+        {
+            _logger.LogInformation("Buscando usuário [{id}]", Id);
+            var Entidade = await _usuarioRepository.ObterUsuarioEntidadePorIdAsync(Id);
+            if (Entidade is null)
+            {
+                _logger.LogWarning("Tentando atualizar senha de um usuário não cadastrado na base. Usuario [{id}]", Id);
+                return false;
+            }
+            _logger.LogInformation("Validando senha atual do usuário [{Id}]", Id);
+            if (!BCrypt.Net.BCrypt.Verify(UsuarioUpdateSenhaRequestDTO.SenhaAtual, Entidade.HashSenha))
+            {
+                var msg = $"Falha na alteração de senha para o usuário ID [{Id}]: Senha atual incorreta.";
+                _logger.LogWarning(msg);
+                throw new InvalidOperationException(msg);
+            }
 
+            _logger.LogDebug("Senha atual verificada com sucesso. Gerando novo hash para o usuário ID [{UsuarioId}]", Id);
+            var novoHash = BCrypt.Net.BCrypt.HashPassword(UsuarioUpdateSenhaRequestDTO.NovaSenha);
+            Entidade.HashSenha = novoHash;
+            Entidade.DataAtualizacao = DateTime.UtcNow;
+            _logger.LogInformation("Tentando atualizar senha usuario pelo id [{id}]", Id);
+            await _usuarioRepository.AtualizaEntidadeUsuarioAsync(Entidade);
+
+            _logger.LogInformation("Senha do usuário ID [{UsuarioId}] alterada com sucesso.", Id);
+            return true;
+        }
         private string GerarTokenJwt(LoginDTO loginDto)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

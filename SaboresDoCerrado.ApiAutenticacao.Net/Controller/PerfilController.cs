@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using SaboresDoCerrado.ApiAutenticacao.Net.Service;
@@ -8,6 +9,7 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Controller
 {
     [ApiController]
     [Route("perfil")]
+    [Authorize(Roles = "Administrador")]
     public class PerfilController : ControllerBase
     {
         private readonly IPerfilService _perfilService;

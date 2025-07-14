@@ -1,4 +1,5 @@
-﻿using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
+﻿using Mapster;
+using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using SaboresDoCerrado.ApiAutenticacao.Net.Model.entity;
 using SaboresDoCerrado.ApiAutenticacao.Net.Repository;
@@ -21,13 +22,13 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
         public async Task<IEnumerable<UsuarioDTO>> ObterTodosAsync()
         {
             _logger.LogInformation("Listando todos os usuarios");
-            return await _usuarioRepository.ObterTodosAsync();
+            return await _usuarioRepository.ObterTodosUsuariosDtoAsync();
         }
 
         public async Task<UsuarioDTO?> ObterPorIdNoTrackAsync(int id)
         {
             _logger.LogInformation("Buscando usuario pelo id [{id}]", id);
-            return await _usuarioRepository.ObterPorIdNoTrackAsync(id);
+            return await _usuarioRepository.ObterUsuarioDtoPorIdAsync(id);
         }
         public async Task<bool> InativarAtivarUsuarioAsync(int id, bool novoStatus)
         {
@@ -35,44 +36,67 @@ namespace SaboresDoCerrado.ApiAutenticacao.Net.Service
             _logger.LogInformation("Executando regra de negócio para {Acao} do usuário ID: [{UsuarioId}]", acao, id);
             return await _usuarioRepository.InativarAivarUsuarioAsync(id, novoStatus);
         }
-        public async Task<UsuarioDTO?> UpdateUsuarioPorId(int id, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
+        public async Task<UsuarioDTO?> AdminAtualizarUsuarioAsync(int id, AdminUsuarioUpdateRequestDTO adminUsuarioUpdateRequestDTO)
         {
-            _logger.LogInformation("Tentando atualizar o usuario pelo id [{id}]", id);
-            var perfisExistentesCount = await _perfilRepository.ContarPerfisExistentesAsync(usuarioUpdateRequestDTO.PerfilIds);
-            if (perfisExistentesCount != usuarioUpdateRequestDTO.PerfilIds.Count)
+            _logger.LogInformation("Admin: Iniciando processo de atualização para o usuário ID: [{UsuarioId}]", id);
+
+            var entidade = await _usuarioRepository.ObterUsuarioEntidadePorIdAsync(id);
+            if (entidade is null)
             {
-                _logger.LogWarning("Tentativa de registro com um ou mais IDs de perfil inválidos.");
-                throw new InvalidOperationException("Um ou mais perfis fornecidos são inválidos.");
+                _logger.LogWarning("Admin: Tentativa de atualizar usuário não existente. ID: [{UsuarioId}]", id);
+                return null;
             }
-            _logger.LogInformation("Tentando atualizar usuario pelo id [{id}]", id);
-            return await _usuarioRepository.UpdateUsuarioPorId(id, usuarioUpdateRequestDTO);
+
+            if (await _usuarioRepository.EmailExistsInAnotherUserAsync(id, adminUsuarioUpdateRequestDTO.Email))
+            {
+                _logger.LogWarning("Admin: Tentativa de atualizar usuário ID [{UsuarioId}] com e-mail [{Email}] que já está em uso.", id, adminUsuarioUpdateRequestDTO.Email);
+                throw new InvalidOperationException("O e-mail fornecido já está em uso por outro usuário.");
+            }
+
+            adminUsuarioUpdateRequestDTO.Adapt(entidade);
+            entidade.DataAtualizacao = DateTime.UtcNow;
+            entidade.UsuarioPerfil.Clear();
+            foreach (var perfilId in adminUsuarioUpdateRequestDTO.PerfilIds)
+            {
+                entidade.UsuarioPerfil.Add(new UsuarioPerfil { PerfilId = perfilId });
+            }
+            await _usuarioRepository.AtualizaEntidadeUsuarioAsync(entidade);
+            _logger.LogInformation("Admin: Usuário ID [{UsuarioId}] atualizado com sucesso.", id);
+
+            return await _usuarioRepository.ObterUsuarioDtoPorIdAsync(id);
         }
 
-        public async Task<bool> UpdateSenhaUsuarioPorIdAsync(int Id, UsuarioUpdateSenhaRequestDTO UsuarioUpdateSenhaRequestDTO)
+        public async Task<UsuarioDTO?> AtualizarUsuarioAsync(int idUsuarioLogado, int idReq, UsuarioUpdateRequestDTO usuarioUpdateRequestDTO)
         {
-            _logger.LogInformation("Buscando usuário [{id}]", Id);
-            var Entidade = await _usuarioRepository.ObterPorIdAsync(Id);
-            if (Entidade is null)
-            {
-                _logger.LogWarning("Tentando atualizar senha de um usuário não cadastrado na base. Usuario [{id}]", Id);
-                return false;
-            }
-            _logger.LogInformation("Validando senha atual do usuário [{Id}]", Id);
-            if(!BCrypt.Net.BCrypt.Verify(UsuarioUpdateSenhaRequestDTO.SenhaAtual, Entidade.HashSenha)){
-                var msg = $"Falha na alteração de senha para o usuário ID [{Id}]: Senha atual incorreta.";
+            if (idReq != idUsuarioLogado) {
+                var msg = $"Usuário: Falha na atualização para o usuário ID [{idReq}]: O usuário [{idUsuarioLogado}] tentou atualizar um usuário diferente";
                 _logger.LogWarning(msg);
                 throw new InvalidOperationException(msg);
             }
 
-            _logger.LogDebug("Senha atual verificada com sucesso. Gerando novo hash para o usuário ID [{UsuarioId}]", Id);
-            var novoHash = BCrypt.Net.BCrypt.HashPassword(UsuarioUpdateSenhaRequestDTO.NovaSenha);
-            Entidade.HashSenha = novoHash;
-            Entidade.DataAtualizacao = DateTime.UtcNow;
-            _logger.LogInformation("Tentando atualizar senha usuario pelo id [{id}]", Id);
-            await _usuarioRepository.UpdateSenhaUsuarioPorIdAsync(Entidade);
+            var entidade = await _usuarioRepository.ObterUsuarioEntidadePorIdAsync(idUsuarioLogado);
 
-            _logger.LogInformation("Senha do usuário ID [{UsuarioId}] alterada com sucesso.", Id);
-            return true;
+            if (entidade is null)
+            {
+                _logger.LogWarning("Tentativa de atualização para um usuário logado que não foi encontrado no banco. ID: [{UsuarioId}]", idUsuarioLogado);
+                return null;
+            }
+
+            if (await _usuarioRepository.EmailExistsInAnotherUserAsync(idUsuarioLogado, usuarioUpdateRequestDTO.Email))
+            {
+                var msg = $"Falha na atualização para o usuário ID [{idUsuarioLogado}]: o e-mail [{usuarioUpdateRequestDTO.Email}] já está em uso"; 
+                _logger.LogWarning(msg);
+                throw new InvalidOperationException(msg);
+            }
+
+            entidade.NomeCompleto = usuarioUpdateRequestDTO.NomeCompleto;
+            entidade.Email = usuarioUpdateRequestDTO.Email;
+            entidade.DataAtualizacao = DateTime.UtcNow;
+            _logger.LogInformation("Usuário ID [{UsuarioId}] iniciando processo de atualização do próprio cadastro.", idUsuarioLogado);
+            await _usuarioRepository.AtualizaEntidadeUsuarioAsync(entidade);
+            _logger.LogInformation("Perfil do usuário ID [{UsuarioId}] atualizado com sucesso.", idUsuarioLogado);
+
+            return await _usuarioRepository.ObterUsuarioDtoPorIdAsync(idUsuarioLogado);
         }
     }
 }
