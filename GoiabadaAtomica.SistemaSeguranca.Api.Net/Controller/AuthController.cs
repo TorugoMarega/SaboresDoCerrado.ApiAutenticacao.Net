@@ -20,6 +20,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             _authService = authService;
             _logger = logger;
         }
+
         [HttpPost("register")]
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> PostUserAsync([FromBody] RegistrationRequestDTO registrationRequestDTO)
@@ -30,7 +31,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             {
 
                 var createdUser = await _authService.RegisterAsync(registrationRequestDTO);
-                var createdUser = new UserDTO {Id = 1};
+
                 stopwatch.Stop();
                 _logger.LogInformation(
                "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",

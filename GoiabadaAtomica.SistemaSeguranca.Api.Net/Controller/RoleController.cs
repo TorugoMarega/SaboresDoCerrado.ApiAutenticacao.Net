@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 {
     [ApiController]
-    [Route("role")]
+    [Route("/api/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class RoleController : ControllerBase
     {
