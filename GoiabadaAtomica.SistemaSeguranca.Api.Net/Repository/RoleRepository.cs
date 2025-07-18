@@ -1,8 +1,6 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Data;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
@@ -65,60 +63,33 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
                 return 0;
             }
 
-            // Conta quantos dos IDs fornecidos existem na tabela de Perfis.
             return await _context.Role
                 .AsNoTracking()
                 .CountAsync(role => roleIds.Contains(role.Id));
-
         }
+
         public async Task<bool> ExistsRoleByNameAsync(string Name, int? idToExclude = null)
         {
             IQueryable<Role> query = _context.Role.AsNoTracking();
             query = query.Where(role => role.Name.ToLower() == Name.ToLower());
-            //caso seja passado um id, ele sera excluido da query 
+
             if (idToExclude.HasValue)
             {
                 query = query.Where(p => p.Id != idToExclude.Value);
             }
             return await query.AnyAsync();
         }
-        public async Task<Role?> UpdateRoleByIdAsync(int id, UpdateRolelRequestDTO roleDTO)
-        {
-            var roleEntity = await GetRoleEntityByIdAsync(id);
-            if (roleEntity is null)
-            {
-                return null;
-            }
-            if (await ExistsRoleByNameAsync(roleDTO.Name, id))
-            {
-                throw new InvalidOperationException($"Há um perfil em uso com o nome [{roleDTO.Name}]");
-            }
-            roleDTO.Adapt(roleEntity);
-            await _context.SaveChangesAsync();
-            return roleEntity;
-        }
-        public async Task<bool?> DeactivateActivateRoleAsync(int id, bool newStatus)
-        {
-            var role = await _context.Role.FirstOrDefaultAsync(role => role.Id == id);
-            if (role is not null)
-            {
-                if (role.Status.Equals(newStatus)) return false;
 
-                role.Status = newStatus;
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            else return null;
-        }
-        public async Task<Role?> CreateRolelAsync(Role role)
+        public async Task<Role> CreateRolelAsync(Role role)
         {
-            if (await ExistsRoleByNameAsync(role.Name))
-            {
-                throw new InvalidOperationException($"Há um perfil em uso com o nome [{role.Name}]");
-            }
             await _context.AddAsync(role);
             await _context.SaveChangesAsync();
             return role;
+        }
+
+        public async Task<int> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync();
         }
     }
 }

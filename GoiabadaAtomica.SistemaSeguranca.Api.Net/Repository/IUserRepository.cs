@@ -9,11 +9,9 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
         Task<UserDTO?> GetUserByIdAsync(int id);
         Task<User?> GetUserEntityByIdAsync(int id);
-        Task<UserDTO?> GetUserByUsernameAsync(string username);
+        Task<User?> GetUserByUsernameAsync(string username);
         Task<bool> EmailExistsAsync(string email);
         Task<bool> UsernameExistsAsync(string username);
-        Task<string?> CheckConflictAsync(string username, string email);
-        Task<LoginDTO?> GetUserByLoginAsync(string username);
         Task<bool> DeactivateActivateUserAsync(int id, bool status);
         Task<bool> EmailExistsInAnotherUserAsync(int id, string email);
         Task UpdateUserAsync(User user);

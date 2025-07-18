@@ -147,10 +147,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     loggedInUserIdString,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    200,
+                    204,
                     stopwatch.ElapsedMilliseconds
                     );
-                return Ok();
+                return NoContent();
             }
             catch (InvalidOperationException ex)
             {

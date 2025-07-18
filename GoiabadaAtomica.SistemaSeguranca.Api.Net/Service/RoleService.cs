@@ -3,6 +3,7 @@ using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
 using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
 using Mapster;
+using MapsterMapper;
 
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
 {
@@ -10,60 +11,88 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
     {
         private readonly IRoleRepository _roleRepository;
         private readonly ILogger<RoleService> _logger;
+        private readonly IMapper _mapper;
 
-
-        public RoleService(IRoleRepository roleRepository, ILogger<RoleService> logger)
+        public RoleService(IRoleRepository roleRepository, ILogger<RoleService> logger, IMapper mapper)
         {
             _roleRepository = roleRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
 
         public async Task<IEnumerable<RoleDTO>> GetAllRolesAsync()
         {
             _logger.LogInformation("Iniciando listagem de Perfis");
-            var roles = await _roleRepository.GetAllRolesAsync();
-            return roles.Adapt<IEnumerable<RoleDTO>>();
+            return await _roleRepository.GetAllRolesAsync();
         }
-        public async Task<RoleDTO> GetRoleByIdAsync(int id)
+
+        public async Task<RoleDTO?> GetRoleByIdAsync(int id)
         {
-            var roles = await _roleRepository.GetRoleByIdAsync(id);
-            if (roles == null)
+            var role = await _roleRepository.GetRoleByIdAsync(id);
+            if (role == null)
             {
                 return null;
             }
-            var roleDTO = roles.Adapt<RoleDTO>();
-            return roleDTO;
+            return role;
         }
+
         public async Task<RoleDTO?> UpdateRoleByIdAsync(int id, UpdateRolelRequestDTO updateRolelRequestDTO)
         {
             _logger.LogInformation("Tentando atualizar o perfil [{id}]", id);
-            var roleEntity = await _roleRepository.UpdateRoleByIdAsync(id, updateRolelRequestDTO);
-            if (roleEntity is not null)
+
+            var roleEntity = await _roleRepository.GetRoleEntityByIdAsync(id);
+            if (roleEntity is null)
             {
-                var roleDTO = roleEntity.Adapt<RoleDTO>();
-                return roleDTO;
+                return null;
             }
-            return null;
+
+            if (await _roleRepository.ExistsRoleByNameAsync(updateRolelRequestDTO.Name, id))
+            {
+                throw new InvalidOperationException($"Há um perfil em uso com o nome [{updateRolelRequestDTO.Name}]");
+            }
+
+            _mapper.Map(updateRolelRequestDTO, roleEntity);
+
+            await _roleRepository.SaveChangesAsync();
+
+            return _mapper.Map<RoleDTO>(roleEntity);
         }
+
         public async Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus)
         {
             _logger.LogInformation("Tentando atualizar o status do perfil [{id}], para o status: [{status}]", id, newStatus);
-            var success = await _roleRepository.DeactivateActivateRoleAsync(id, newStatus);
-            if (success is null) _logger.LogWarning("Perfil [{id}] não encontrado!", id);
-            if (success.Equals(false)) _logger.LogWarning("O perfil [{id}] já está no status: [{newStatus}]", id, newStatus);
-            return success;
+
+            var role = await _roleRepository.GetRoleEntityByIdAsync(id);
+            if (role is null)
+            {
+                return null;
+            }
+
+            if (role.Status.Equals(newStatus))
+            {
+                return false;
+            }
+
+            role.Status = newStatus;
+            await _roleRepository.SaveChangesAsync();
+
+            return true;
         }
+
         public async Task<RoleDTO> CreateRoleAsync(PostRoleRequestDTO postRoleRequestDTO)
         {
-            var role = new Role
+            if (await _roleRepository.ExistsRoleByNameAsync(postRoleRequestDTO.Name))
             {
-                Name = postRoleRequestDTO.Name,
-                Description = postRoleRequestDTO.Description,
-                Status = true
-            };
+                throw new InvalidOperationException($"Há um perfil em uso com o nome [{postRoleRequestDTO.Name}]");
+            }
+
+            var role = _mapper.Map<Role>(postRoleRequestDTO);
+            role.Status = true;
+
             var newRoleEntity = await _roleRepository.CreateRolelAsync(role);
-            return newRoleEntity.Adapt(new RoleDTO());
+
+            return _mapper.Map<RoleDTO>(newRoleEntity);
         }
     }
 }
