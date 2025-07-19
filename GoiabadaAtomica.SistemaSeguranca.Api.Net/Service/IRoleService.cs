@@ -10,5 +10,6 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
         Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus);
         Task<RoleDTO?> UpdateRoleByIdAsync(int id, UpdateRolelRequestDTO updateRolelRequestDTO);
         Task<RoleDTO> CreateRoleAsync(PostRoleRequestDTO postRoleRequestDTO);
+        Task<bool> CheckRoleIUseAync(int roleId);
     }
 }

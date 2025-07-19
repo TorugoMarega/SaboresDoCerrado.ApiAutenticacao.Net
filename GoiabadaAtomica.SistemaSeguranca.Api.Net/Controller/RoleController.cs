@@ -114,49 +114,65 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         [HttpDelete("{id}")]
         public async Task<IActionResult> InactivateById(int id)
         {
-            var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", id);
+                var stopwatch = Stopwatch.StartNew();
+            try {
+                _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", id);
 
-            var success = await _rolelService.DeactivateActivateRolesByIdAsync(id, false);
+                var success = await _rolelService.DeactivateActivateRolesByIdAsync(id, false);
 
-            if (success is null)
-            {
+                if (success is null)
+                {
+                    stopwatch.Stop();
+                    _logger.LogWarning(
+                        "Tentativa de inativar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        id,
+                        HttpContext.Request.Method,
+                        HttpContext.Request.Path,
+                        404,
+                        stopwatch.ElapsedMilliseconds
+                        );
+                    return NotFound();
+                }
+
+                if (success.Equals(false))
+                {
+                    stopwatch.Stop();
+                    _logger.LogWarning(
+                        "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        id,
+                        HttpContext.Request.Method,
+                        HttpContext.Request.Path,
+                        400,
+                        stopwatch.ElapsedMilliseconds
+                        );
+                    return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo" });
+                }
+
                 stopwatch.Stop();
-                _logger.LogWarning(
-                    "Tentativa de inativar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                _logger.LogInformation(
+                    "Perfil inativado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    404,
+                    200,
                     stopwatch.ElapsedMilliseconds
                     );
-                return NotFound();
+                return NoContent();
             }
-
-            if (success.Equals(false))
+            catch(InvalidOperationException ex)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
-                    "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
+                    ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     400,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo" });
+                return BadRequest(new { mensagem = ex.Message });
             }
-
-            stopwatch.Stop();
-            _logger.LogInformation(
-                "Perfil inativado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                id,
-                HttpContext.Request.Method,
-                HttpContext.Request.Path,
-                200,
-                stopwatch.ElapsedMilliseconds
-                );
-            return NoContent();
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRoleByIdAsync(int id, [FromBody] UpdateRolelRequestDTO updateRolelRequestDTO)

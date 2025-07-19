@@ -91,5 +91,15 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
         {
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> ExistsRoleInUseByIdAsync(int id)
+        {
+            _logger.LogInformation("Iniciando busca do perfil em uso por ID [{roleId}] no banco de dados", id);
+            var roleInUse = await _context.UserRole
+                .AsNoTracking()
+                .Where(userRole => userRole.RoleId == id)
+                .AnyAsync();
+            return roleInUse;
+        }
     }
 }

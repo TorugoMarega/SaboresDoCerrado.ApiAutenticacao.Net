@@ -61,8 +61,12 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
 
         public async Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus)
         {
+            if (await CheckRoleIUseAync(id)) {
+                var msg = $"O perfil [{id}] está em uso, operação inválida";
+                _logger.LogWarning(msg);
+                throw new InvalidOperationException(msg);
+                    }
             _logger.LogInformation("Tentando atualizar o status do perfil [{id}], para o status: [{status}]", id, newStatus);
-
             var role = await _roleRepository.GetRoleEntityByIdAsync(id);
             if (role is null)
             {
@@ -93,6 +97,11 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
             var newRoleEntity = await _roleRepository.CreateRolelAsync(role);
 
             return _mapper.Map<RoleDTO>(newRoleEntity);
+        }
+
+        public async Task<bool> CheckRoleIUseAync(int roleId)
+        {
+            return await _roleRepository.ExistsRoleInUseByIdAsync(roleId);
         }
     }
 }

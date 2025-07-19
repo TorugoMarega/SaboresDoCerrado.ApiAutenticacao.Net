@@ -12,5 +12,6 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
         Task<bool> ExistsRoleByNameAsync(string Name, int? idToExclude = null);
         Task<Role> CreateRolelAsync(Role role);
         Task<int> SaveChangesAsync();
+        Task<bool> ExistsRoleInUseByIdAsync(int id);
     }
 }
