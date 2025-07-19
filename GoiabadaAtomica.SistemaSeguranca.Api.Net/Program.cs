@@ -7,6 +7,7 @@ using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using System.Reflection;
@@ -32,14 +33,45 @@ try
         .Enrich.FromLogContext()
         .WriteTo.Console()); // Configura a saída para o console
 
-
+    // --- SWAGGER ---
     // Add services to the container.
     // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
     builder.Services.AddOpenApi();
-
     builder.Services.AddEndpointsApiExplorer(); // Necessário para o Swagger coletar informações
     builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        // Configuração básica que você já pode ter
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Goiabada Atômica - API de Segurança", Version = "v1" });
 
+        // 1. Define o esquema de segurança que a nossa API usa (Bearer Token JWT)
+        c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Insira o token JWT: {seu token}"
+        });
+
+        // 2. Adiciona o requisito de segurança a todos os endpoints
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+    });
+    // --- END SWAGGER ---
     var connectionString = builder.Configuration.GetConnectionString("MysqlSegurancaGoiabadaAtomicaDsvConnection");
 
     var typeAdapterConfig = TypeAdapterConfig.GlobalSettings;
