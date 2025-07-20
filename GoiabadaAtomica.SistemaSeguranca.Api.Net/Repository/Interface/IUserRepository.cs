@@ -1,7 +1,7 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Repository
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
 {
     public interface IUserRepository
     {

@@ -1,6 +1,6 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
-using GoiabadaAtomica.ApiAutenticacao.Net.Service;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;

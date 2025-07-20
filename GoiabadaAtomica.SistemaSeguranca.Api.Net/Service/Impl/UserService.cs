@@ -1,10 +1,11 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
-using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Mapster;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
     public class UserService : IUserService
     {
