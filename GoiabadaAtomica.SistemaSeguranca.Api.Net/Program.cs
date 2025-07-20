@@ -83,14 +83,14 @@ builder.Services.AddDbContext<ApplicationContext>(options =>
 builder.Services.AddSingleton(typeAdapterConfig);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepositoryImpl>();
+builder.Services.AddScoped<IRoleService, RoleServiceImpl>();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepositoryImpl>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserService, UserServiceImpl>();
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();

@@ -7,10 +7,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
     {
         Task<IEnumerable<RoleDTO>> GetAllRolesAsync();
         Task<RoleDTO?> GetRoleByIdAsync(int id);
-        Task<Role?> GetRoleEntityByIdAsync(int id);
+        Task<RoleEntity?> GetRoleEntityByIdAsync(int id);
         Task<int> CountRolesAsync(List<int> roleIds);
         Task<bool> ExistsRoleByNameAsync(string Name, int? idToExclude = null);
-        Task<Role> CreateRolelAsync(Role role);
+        Task<RoleEntity> CreateRolelAsync(RoleEntity role);
         Task<int> SaveChangesAsync();
         Task<bool> ExistsRoleInUseByIdAsync(int id);
     }

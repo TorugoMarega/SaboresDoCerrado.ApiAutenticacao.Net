@@ -7,13 +7,13 @@ using Mapster;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
-    public class UserService : IUserService
+    public class UserServiceImpl : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
-        private readonly ILogger<UserService> _logger;
+        private readonly ILogger<UserServiceImpl> _logger;
 
-        public UserService(IUserRepository userRepository, IRoleRepository roleRepository, ILogger<UserService> logger)
+        public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, ILogger<UserServiceImpl> logger)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
@@ -59,7 +59,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             userEntity.UserRole.Clear();
             foreach (var roleId in updateUserAdminRequestDTO.RoleIds)
             {
-                userEntity.UserRole.Add(new UserRole { RoleId = roleId });
+                userEntity.UserRole.Add(new UserRoleEntity { RoleId = roleId });
             }
             await _userRepository.UpdateUserAsync(userEntity);
             _logger.LogInformation("Admin: Usuário ID [{UserId}] atualizado com sucesso.", id);

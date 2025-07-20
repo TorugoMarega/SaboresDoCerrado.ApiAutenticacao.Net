@@ -1,6 +1,6 @@
 ﻿namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.entity
 {
-    public class User
+    public class UserEntity
     {
         public int Id { get; set; }
         public required string Username { get; set; }
@@ -10,6 +10,6 @@
         public required bool IsActive { get; set; }
         public required DateTime CreatedAt { get; set; }
         public required DateTime UpdatedAt { get; set; }
-        public ICollection<UserRole> UserRole { get; set; }
+        public ICollection<UserRoleEntity> UserRole { get; set; }
     }
 }

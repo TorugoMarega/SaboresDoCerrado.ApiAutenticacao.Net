@@ -12,15 +12,15 @@ using System.Text;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
-    public class AuthService : IAuthService
+    public class AuthServiceImpl : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AuthService> _logger;
+        private readonly ILogger<AuthServiceImpl> _logger;
         private readonly IMapper _mapper;
 
-        public AuthService(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
+        public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthServiceImpl> logger, IMapper mapper)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
@@ -51,7 +51,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             _logger.LogInformation("Validações de unicidade aprovadas para [{Email}/{Username}]", registrationRequestDTO.Email, registrationRequestDTO.Username);
             _logger.LogDebug("Usuario novo");
             _logger.LogDebug("Tentando converter DTO para Entidade");
-            var userEntity = new User
+            var userEntity = new UserEntity
             {
                 Username = registrationRequestDTO.Username,
                 FullName = registrationRequestDTO.FullName,
@@ -60,7 +60,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                UserRole = registrationRequestDTO.RoleIds.Select(role => new UserRole { RoleId = role }).ToList()
+                UserRole = registrationRequestDTO.RoleIds.Select(role => new UserRoleEntity { RoleId = role }).ToList()
             };
             _logger.LogDebug("Tentando persistir usuario");
             var registeredUser = await _userRepository.RegisterUserAsync(userEntity);
@@ -131,7 +131,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             return true;
         }
 
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(UserEntity user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
