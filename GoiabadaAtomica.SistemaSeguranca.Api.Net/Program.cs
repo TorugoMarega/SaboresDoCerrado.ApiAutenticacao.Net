@@ -1,7 +1,9 @@
 using GoiabadaAtomica.ApiAutenticacao.Net.Data;
 using GoiabadaAtomica.ApiAutenticacao.Net.Middleware;
-using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
-using GoiabadaAtomica.ApiAutenticacao.Net.Service;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

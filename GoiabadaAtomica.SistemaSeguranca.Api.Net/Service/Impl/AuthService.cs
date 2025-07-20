@@ -2,14 +2,15 @@
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.response;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
-using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using MapsterMapper;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
     public class AuthService : IAuthService
     {

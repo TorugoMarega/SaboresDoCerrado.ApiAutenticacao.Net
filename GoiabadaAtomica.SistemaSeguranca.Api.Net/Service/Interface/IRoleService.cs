@@ -1,7 +1,7 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IRoleService
     {
