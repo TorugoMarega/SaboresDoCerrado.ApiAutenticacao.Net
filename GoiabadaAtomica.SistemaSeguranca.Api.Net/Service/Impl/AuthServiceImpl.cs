@@ -1,25 +1,26 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.response;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
-using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Auth;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using MapsterMapper;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
-    public class AuthService : IAuthService
+    public class AuthServiceImpl : IAuthService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AuthService> _logger;
+        private readonly ILogger<AuthServiceImpl> _logger;
         private readonly IMapper _mapper;
 
-        public AuthService(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthService> logger, IMapper mapper)
+        public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthServiceImpl> logger, IMapper mapper)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;
@@ -50,7 +51,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
             _logger.LogInformation("Validações de unicidade aprovadas para [{Email}/{Username}]", registrationRequestDTO.Email, registrationRequestDTO.Username);
             _logger.LogDebug("Usuario novo");
             _logger.LogDebug("Tentando converter DTO para Entidade");
-            var userEntity = new User
+            var userEntity = new UserEntity
             {
                 Username = registrationRequestDTO.Username,
                 FullName = registrationRequestDTO.FullName,
@@ -59,7 +60,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                UserRole = registrationRequestDTO.RoleIds.Select(role => new UserRole { RoleId = role }).ToList()
+                UserRole = registrationRequestDTO.RoleIds.Select(role => new UserRoleEntity { RoleId = role }).ToList()
             };
             _logger.LogDebug("Tentando persistir usuario");
             var registeredUser = await _userRepository.RegisterUserAsync(userEntity);
@@ -130,7 +131,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
             return true;
         }
 
-        private string GenerateJwtToken(User user)
+        private string GenerateJwtToken(UserEntity user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 

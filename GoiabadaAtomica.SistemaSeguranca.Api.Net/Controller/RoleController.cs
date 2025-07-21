@@ -1,5 +1,5 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
-using GoiabadaAtomica.ApiAutenticacao.Net.Service;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
@@ -114,8 +114,9 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         [HttpDelete("{id}")]
         public async Task<IActionResult> InactivateById(int id)
         {
-                var stopwatch = Stopwatch.StartNew();
-            try {
+            var stopwatch = Stopwatch.StartNew();
+            try
+            {
                 _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", id);
 
                 var success = await _rolelService.DeactivateActivateRolesByIdAsync(id, false);
@@ -159,7 +160,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     );
                 return NoContent();
             }
-            catch(InvalidOperationException ex)
+            catch (InvalidOperationException ex)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(

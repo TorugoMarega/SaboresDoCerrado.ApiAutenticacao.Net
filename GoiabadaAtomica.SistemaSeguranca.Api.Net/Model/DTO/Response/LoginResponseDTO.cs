@@ -1,4 +1,4 @@
-﻿namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.response
+﻿namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response
 {
     public class LoginResponseDTO
     {

@@ -1,10 +1,10 @@
 ﻿namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.entity
 {
-    public class UserRole
+    public class UserRoleEntity
     {
         public int UserId { get; set; }
         public int RoleId { get; set; }
-        public User User { get; set; }
-        public Role Role { get; set; }
+        public UserEntity User { get; set; }
+        public RoleEntity Role { get; set; }
     }
 }

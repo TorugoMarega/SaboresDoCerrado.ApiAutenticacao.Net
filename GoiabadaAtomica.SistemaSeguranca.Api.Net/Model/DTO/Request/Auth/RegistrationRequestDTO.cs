@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Auth
 {
     public class RegistrationRequestDTO
     {
