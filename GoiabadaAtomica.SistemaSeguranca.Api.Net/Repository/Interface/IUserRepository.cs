@@ -1,5 +1,5 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
 {

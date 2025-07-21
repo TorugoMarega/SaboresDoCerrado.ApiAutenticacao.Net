@@ -1,5 +1,5 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
 {
@@ -9,7 +9,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
         Task<RoleDTO?> GetRoleByIdAsync(int id);
         Task<RoleEntity?> GetRoleEntityByIdAsync(int id);
         Task<int> CountRolesAsync(List<int> roleIds);
-        Task<bool> ExistsRoleByNameAsync(string Name, int? idToExclude = null);
+        Task<bool> ExistsRoleByNameAsync(string name, int? idToExclude = null);
         Task<RoleEntity> CreateRolelAsync(RoleEntity role);
         Task<int> SaveChangesAsync();
         Task<bool> ExistsRoleInUseByIdAsync(int id);

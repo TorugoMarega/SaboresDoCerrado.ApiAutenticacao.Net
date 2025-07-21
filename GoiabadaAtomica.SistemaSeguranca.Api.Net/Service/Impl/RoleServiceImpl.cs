@@ -1,6 +1,6 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using MapsterMapper;
