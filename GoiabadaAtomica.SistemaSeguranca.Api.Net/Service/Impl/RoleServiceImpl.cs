@@ -1,19 +1,19 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
-using GoiabadaAtomica.ApiAutenticacao.Net.Repository;
-using Mapster;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using MapsterMapper;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
-    public class RoleService : IRoleService
+    public class RoleServiceImpl : IRoleService
     {
         private readonly IRoleRepository _roleRepository;
-        private readonly ILogger<RoleService> _logger;
+        private readonly ILogger<RoleServiceImpl> _logger;
         private readonly IMapper _mapper;
 
-        public RoleService(IRoleRepository roleRepository, ILogger<RoleService> logger, IMapper mapper)
+        public RoleServiceImpl(IRoleRepository roleRepository, ILogger<RoleServiceImpl> logger, IMapper mapper)
         {
             _roleRepository = roleRepository;
             _logger = logger;
@@ -61,11 +61,12 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
 
         public async Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus)
         {
-            if (await CheckRoleIUseAync(id)) {
+            if (await CheckRoleIUseAync(id))
+            {
                 var msg = $"O perfil [{id}] está em uso, operação inválida";
                 _logger.LogWarning(msg);
                 throw new InvalidOperationException(msg);
-                    }
+            }
             _logger.LogInformation("Tentando atualizar o status do perfil [{id}], para o status: [{status}]", id, newStatus);
             var role = await _roleRepository.GetRoleEntityByIdAsync(id);
             if (role is null)
@@ -91,7 +92,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
                 throw new InvalidOperationException($"Há um perfil em uso com o nome [{postRoleRequestDTO.Name}]");
             }
 
-            var role = _mapper.Map<Role>(postRoleRequestDTO);
+            var role = _mapper.Map<RoleEntity>(postRoleRequestDTO);
             role.Status = true;
 
             var newRoleEntity = await _roleRepository.CreateRolelAsync(role);

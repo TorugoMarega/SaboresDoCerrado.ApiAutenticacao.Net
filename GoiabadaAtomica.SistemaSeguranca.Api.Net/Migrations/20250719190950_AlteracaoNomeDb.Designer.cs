@@ -4,6 +4,7 @@ using GoiabadaAtomica.ApiAutenticacao.Net.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ContextoAplicacaoModelSnapshot : ModelSnapshot
+    [Migration("20250719190950_AlteracaoNomeDb")]
+    partial class AlteracaoNomeDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.RoleEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -46,7 +49,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
                     b.ToTable("tbl_roles", (string)null);
                 });
 
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -90,7 +93,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
                     b.ToTable("tbl_users", (string)null);
                 });
 
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserRoleEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserRole", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -105,94 +108,15 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
                     b.ToTable("tbl_user_x_role", (string)null);
                 });
 
-            modelBuilder.Entity("GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity.ClientSystemEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserRole", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClientId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("ClientSecret")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("RedirectUri")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClientId")
-                        .IsUnique();
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("tbl_client_systems", (string)null);
-                });
-
-            modelBuilder.Entity("GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity.FeatureEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClientSystemId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("tinyint(1)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("tbl_features", (string)null);
-                });
-
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserRoleEntity", b =>
-                {
-                    b.HasOne("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.RoleEntity", "Role")
+                    b.HasOne("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.Role", "Role")
                         .WithMany("UserRole")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserEntity", "User")
+                    b.HasOne("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.User", "User")
                         .WithMany("UserRole")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -203,12 +127,12 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.RoleEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.Role", b =>
                 {
                     b.Navigation("UserRole");
                 });
 
-            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.UserEntity", b =>
+            modelBuilder.Entity("GoiabadaAtomica.ApiAutenticacao.Net.Model.entity.User", b =>
                 {
                     b.Navigation("UserRole");
                 });

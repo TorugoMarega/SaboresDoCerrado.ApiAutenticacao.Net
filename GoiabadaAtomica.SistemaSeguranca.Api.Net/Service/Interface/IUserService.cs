@@ -1,7 +1,7 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Service
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IUserService
     {
