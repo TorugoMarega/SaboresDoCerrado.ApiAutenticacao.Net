@@ -42,7 +42,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _logger.LogDebug("Busca de Sistema do Cliente finalizada com sucesso!");
             return clientSystemDTO;
         }
-        public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemByIdAsync(){
+        public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemByAsync(){
             _logger.LogInformation("Iniciando busca de todos os Sistemas");
             var clientSystemDTOList = await _applicationContext.ClientSystemEntity
                 .AsNoTracking()
@@ -58,10 +58,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _logger.LogDebug("Busca de Sistemas finalizada com sucesso!");
             return clientSystemDTOList;
         }
-        public async Task<int> CreateClientSystemAsync(ClientSystemEntity clientSystem){
+        public async Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(ClientSystemEntity clientSystem){
             _logger.LogInformation("Persistindo sistema no banco de dados");
             await _applicationContext.ClientSystemEntity.AddAsync(clientSystem);
-            return await _applicationContext.SaveChangesAsync();
+            await _applicationContext.SaveChangesAsync();
+            return clientSystem.Adapt<CreateClientSystemResponseDTO>();
         }
         public async Task<int> UpdateClientSystemAsync(ClientSystemEntity clientSystem)
         {
