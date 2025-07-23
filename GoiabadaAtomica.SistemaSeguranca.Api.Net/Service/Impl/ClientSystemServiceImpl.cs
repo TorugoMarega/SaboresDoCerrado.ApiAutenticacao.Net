@@ -26,7 +26,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             var clientSystemEntity = createClientSystemRequestDTO.Adapt<ClientSystemEntity>();
             clientSystemEntity.CreatedAt = DateTime.UtcNow;
             clientSystemEntity.UpdatedAt = DateTime.UtcNow;
-
+            clientSystemEntity.Status = true;
             clientSystemEntity.ClientId = Guid.NewGuid().ToString();
 
             //iremos devolver ao admin uma única vez após o cadastro
@@ -50,12 +50,57 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             }
             return clientSystem;
         }
-        public async Task<ClientSystemDTO> UpdateClientSystemAsync(UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
+        public async Task<ClientSystemDTO?> UpdateClientSystemAsync(int id, UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados",id);
+
+            var nameInUse = await _clientSystemRepository.ExistsClientSystemByNameAsync(updateClientSystemRequestDTO.Name);
+            if (nameInUse)
+            {
+                throw new InvalidOperationException($"O nome {updateClientSystemRequestDTO.Name} já está em uso");
+            }
+
+            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(id);
+            if (clientSystemEntity == null)
+            {
+                return null;
+            }
+
+            clientSystemEntity.Name = updateClientSystemRequestDTO.Name;
+            clientSystemEntity.Description = updateClientSystemRequestDTO.Description;
+
+            if (updateClientSystemRequestDTO.Status.Equals(false)) {
+                //adicionar validacoes
+                if(!await ValidationDeactivateActivateClientSystemAsync(id, updateClientSystemRequestDTO.Status) is not null)
+                {
+                    clientSystemEntity.Status = false;
+                }
+            }
+            clientSystemEntity.Status = updateClientSystemRequestDTO.Status;
+            _logger.LogInformation("Atualizando dados do Sistema [{ID}] no banco de dados", id);
+            await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
+            _logger.LogInformation("Retornando Sistema [{ID}] no banco de dados", id);
+            return await _clientSystemRepository.GetClientSystemDTOByIdAsync(id);
         }
-        public async Task DeactivateActivateClientSystemAsync(string id)
+        public async Task<bool?> DeactivateActivateClientSystemAsync(int id, bool newStatus)
         {
+            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", id);
+            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(id);
+            if (clientSystemEntity == null)
+            {
+                return null;
+            }
+
+            //adicionar regras de validacao
+            var validationReturn = ValidationDeactivateActivateClientSystemAsync(id, newStatus);
+
+            clientSystemEntity.Status = newStatus;
+
+            await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
+            return true;
+        }
+
+        public async Task<bool?> ValidationDeactivateActivateClientSystemAsync(int id, bool newStatus) { 
             throw new NotImplementedException();
         }
     }
