@@ -36,7 +36,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     Name = clientSystem.Name,
                     Description = clientSystem.Description,
                     ClientId = clientSystem.ClientId,
-                    Status = clientSystem.Status
+                    IsActive = clientSystem.IsActive
                 })
                 .FirstOrDefaultAsync(clientSystem => clientSystem.Id == id);
             _logger.LogDebug("Busca de Sistema do Cliente finalizada com sucesso!");
@@ -52,7 +52,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     Name = clientSystem.Name,
                     Description = clientSystem.Description,
                     ClientId = clientSystem.ClientId,
-                    Status = clientSystem.Status
+                    IsActive = clientSystem.IsActive
                 })
                 .ToListAsync();
             _logger.LogDebug("Busca de Sistemas finalizada com sucesso!");

@@ -8,6 +8,6 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil
         public string Name { get; set; }
         [Required(ErrorMessage = "A descrição do perfil é obrigatória.")]
         public string Description { get; set; }
-        public bool Status { get; set; }
+        public bool IsActive { get; set; }
     }
 }

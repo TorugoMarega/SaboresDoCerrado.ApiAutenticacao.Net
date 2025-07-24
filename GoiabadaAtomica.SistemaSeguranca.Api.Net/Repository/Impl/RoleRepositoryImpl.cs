@@ -26,7 +26,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     Id = role.Id,
                     Descritption = role.Description,
                     Name = role.Name,
-                    Status = role.Status
+                    IsActive = role.IsActive
                 })
                 .ToListAsync();
             return roles;
@@ -43,7 +43,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     Id = role.Id,
                     Descritption = role.Description,
                     Name = role.Name,
-                    Status = role.Status
+                    IsActive = role.IsActive
                 })
                 .FirstOrDefaultAsync();
             return role;

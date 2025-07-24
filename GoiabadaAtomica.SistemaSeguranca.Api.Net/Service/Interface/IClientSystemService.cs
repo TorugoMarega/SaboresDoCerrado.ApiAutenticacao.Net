@@ -10,6 +10,5 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
         Task <bool?> DeactivateActivateClientSystemAsync(int id, bool newStatus);
         Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync();
         Task<ClientSystemDTO?> GetClientSystemByIdAsync(int id);
-        Task<bool?> ValidationDeactivateActivateClientSystemAsync(int id, bool newStatus);
     }
 }

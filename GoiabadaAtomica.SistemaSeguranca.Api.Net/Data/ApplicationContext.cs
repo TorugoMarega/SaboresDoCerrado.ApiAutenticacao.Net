@@ -12,6 +12,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Data
         public DbSet<UserRoleEntity> UserRoleEntity { get; set; }
         public DbSet<ClientSystemEntity> ClientSystemEntity { get; set; }
         public DbSet<FeatureEntity> FeatureEntity { get; set; }
+        public DbSet<AuthenticationProviderEntity> AuthenticationProvider { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -50,6 +51,29 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Data
             {
                 entity.ToTable("tbl_features");
                 entity.HasIndex(f => f.Name).IsUnique();
+            });
+            //RoleFeatureEntity
+            modelBuilder.Entity<RoleFeatureEntity>(entity =>
+            {
+                entity.ToTable("tbl_role_x_feature");
+                entity.HasKey(rf => new { rf.RoleId, rf.FeatureId, rf.ClientSystemId });
+            });
+            //PasswordPolicyEntity
+            modelBuilder.Entity<PasswordPolicyEntity>(entity =>
+            {
+                entity.ToTable("tbl_password_policies");
+            });
+            //AuthenticationProviderEntity
+            modelBuilder.Entity<AuthenticationProviderEntity>(entity =>
+            {
+                entity.ToTable("tbl_authentication_providers");
+                entity.HasIndex(ap => ap.Name).IsUnique();
+            });
+            //UserProviderEntity
+            modelBuilder.Entity<UserProviderEntity>(entity =>
+            {
+                entity.ToTable("tbl_user_x_provider");
+                entity.HasKey(up => new { up.UserId, up.AuthenticationProviderId });
             });
         }
     }
