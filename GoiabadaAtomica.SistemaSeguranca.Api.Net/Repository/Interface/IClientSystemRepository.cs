@@ -1,6 +1,5 @@
 ﻿using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response.ClientSystem;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity;
-using System.Threading.Tasks;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
 {

@@ -111,7 +111,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             _logger.LogDebug("Executando validação de dependências para o ClientSystem ID: [{Id}]", clientSystemId);
             if (newStatus.Equals(false))
             {
-                if(await _authenticationProviderRepository.ExistsActiveAuthenticationProviderByClientSystemIdAsync(clientSystemId))
+                if (await _authenticationProviderRepository.ExistsActiveAuthenticationProviderByClientSystemIdAsync(clientSystemId))
                 {
                     throw new InvalidOperationException("Este sistema não pode ser inativado pois possui funcionalidades ativas.");
                 }

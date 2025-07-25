@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
 {
-    public class AuthenticationProviderRepository:IAuthenticationProviderRepository
+    public class AuthenticationProviderRepository : IAuthenticationProviderRepository
     {
         private readonly ILogger<IAuthenticationProviderRepository> _logger;
         private ApplicationContext _context;
@@ -15,11 +15,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _context = context;
         }
 
-        public async Task<bool> ExistsActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId) {
+        public async Task<bool> ExistsActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId)
+        {
             return await _context.AuthenticationProvider
                 .AsNoTracking()
                 .AnyAsync(ap => ap.ClientSystemId == clientSystemId);
-                
+
         }
     }
 }

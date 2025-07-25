@@ -1,5 +1,4 @@
 ﻿using GoiabadaAtomica.ApiAutenticacao.Net.Controller;
-using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.ClientSystem;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +22,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRolesAsync()
+        public async Task<IActionResult> GetAllClientSystemsAsync()
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todos os perfis.");
@@ -116,7 +115,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> InactivateById(int id)
+        public async Task<IActionResult> DeactivateClientSystemById(int id)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -180,16 +179,16 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             }
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoleByIdAsync(int id, [FromBody] UpdateClientSystemRequestDTO UpdateClientSystemRequestDTO)
+        public async Task<IActionResult> UpdateClientSystemsByIdAsync(int id, [FromBody] UpdateClientSystemRequestDTO UpdateClientSystemRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar usuário ID: [{ClientSystemID}]", id);
+            _logger.LogInformation("Requisição recebida para atualizar sistema ID: [{ClientSystemID}]", id);
 
             try
             {
-                var updatedRole = await _clientSystemService.UpdateClientSystemAsync(id, UpdateClientSystemRequestDTO);
+                var updatedClientSystems = await _clientSystemService.UpdateClientSystemAsync(id, UpdateClientSystemRequestDTO);
 
-                if (updatedRole is null)
+                if (updatedClientSystems is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
@@ -205,14 +204,14 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "Perfil atualizado com sucesso: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Sistema atualizado com sucesso: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,
                     stopwatch.ElapsedMilliseconds
                     );
-                return Ok(updatedRole);
+                return Ok(updatedClientSystems);
             }
             catch (InvalidOperationException ex)
             {

@@ -1,30 +1,32 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil;
+﻿using GoiabadaAtomica.ApiAutenticacao.Net.Controller;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Feature;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
-    [ApiController]
-    [Route("/api/[controller]")]
+    [Controller]
+    [Route("api/[Controller]")]
     [Authorize(Roles = "Administrador")]
-    public class RoleController : ControllerBase
+    public class FeatureController : ControllerBase
     {
-        private readonly IRoleService _rolelService;
-        private readonly ILogger<RoleController> _logger; //inject
-        public RoleController(IRoleService rolelService, ILogger<RoleController> logger)
+        private readonly ILogger<AuthController> _logger;
+        private readonly IFeatureService _featureService;
+
+        public FeatureController(ILogger<AuthController> logger, IFeatureService featureService)
         {
-            _rolelService = rolelService;
             _logger = logger;
+            _featureService = featureService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRolesAsync()
+        public async Task<IActionResult> GetAllFeaturesAsync()
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para listar todos os perfis.");
-            var roles = await _rolelService.GetAllRolesAsync();
+            _logger.LogInformation("Requisição recebida para listar todas as Features.");
+            var clientSystems = await _featureService.GetAllFeaturesAsync();
             stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
@@ -33,20 +35,20 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 200,
                 stopwatch.ElapsedMilliseconds
             );
-            return Ok(roles);
+            return Ok(clientSystems);
         }
 
-        [HttpGet("{id}", Name = "GetRoleByIdAsync")]
-        public async Task<IActionResult> GetRoleByIdAsync(int id)
+        [HttpGet("{id}", Name = "GetFeatureByIdAsync")]
+        public async Task<IActionResult> GetFeatureByIdAsync(int id)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para buscar perfil por ID: [{ID}].", id);
-            var role = await _rolelService.GetRoleByIdAsync(id);
-            if (role is null)
+            _logger.LogInformation("Requisição recebida para buscar a Feature pelo ID: [{ID}].", id);
+            var clientSystem = await _featureService.GetFeatureByIdAsync(id);
+            if (clientSystem is null)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
-                    "Perfil não encontrado. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Feature não encontrada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -62,19 +64,20 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 200,
                 stopwatch.ElapsedMilliseconds
             );
-            return Ok(role);
+            return Ok(clientSystem);
         }
+
         [HttpPost]
-        public async Task<IActionResult> PostRoleAsync([FromBody] PostRoleRequestDTO postRoleRequestDTO)
+        public async Task<IActionResult> PostFeatureAsync([FromBody] CreateFeatureRequestDTO createFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
 
-                _logger.LogInformation("Requisição recebida para cadastrar perfil: [{name}].", postRoleRequestDTO.Name);
+                _logger.LogInformation("Requisição recebida para cadastrar Feature: [{name}].", createFeatureRequestDTO.Name);
 
-                var createdRole = await _rolelService.CreateRoleAsync(postRoleRequestDTO);
-                if (createdRole is not null)
+                var createdFeature = await _featureService.CreateFeatureAsync(createFeatureRequestDTO);
+                if (createdFeature is not null)
                 {
                     stopwatch.Stop();
                     _logger.LogInformation(
@@ -84,17 +87,17 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     201,
                     stopwatch.ElapsedMilliseconds
                     );
-                    return CreatedAtRoute("GetRoleByIdAsync", new { id = createdRole.Id }, createdRole);
+                    return CreatedAtRoute("GetFeatureByIdAsync", new { id = createdFeature.Id }, createdFeature);
                 }
                 stopwatch.Stop();
                 _logger.LogWarning(
-                    "Tentativa de cadastrar perfil finalizada sem sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Tentativa de cadastrar Feature finalizada sem sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     400,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = "Tentativa de cadastrar perfil finalizada sem sucesso" });
+                return BadRequest(new { mensagem = "Tentativa de cadastrar Feature finalizada sem sucesso" });
             }
             catch (InvalidOperationException ex)
             {
@@ -112,20 +115,20 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeactivateRoleById(int id)
+        public async Task<IActionResult> DeactivateFeatureById(int id)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", id);
+                _logger.LogInformation("Requisição recebida para INATIVAR a Feature ID: [{FeatureId}]", id);
 
-                var success = await _rolelService.DeactivateActivateRolesByIdAsync(id, false);
+                var success = await _featureService.DeactivateActivateFeatureAsync(id, false);
 
                 if (success is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
-                        "Tentativa de inativar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        "Tentativa de inativar Feature não existente ID: [{FeatureId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                         id,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
@@ -139,19 +142,19 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
-                        "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                        "Tentativa de inativar Feature finalizada sem sucesso para o ID: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                         id,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
                         400,
                         stopwatch.ElapsedMilliseconds
                         );
-                    return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo" });
+                    return BadRequest(new { mensagem = $"A Feature [{id}] já está inativa" });
                 }
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "Perfil inativado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Feature inativada com sucesso: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -164,7 +167,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
-                    "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Tentativa de inativar Feature finalizada sem sucesso para o ID: [{FeatureID}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     ex.Message,
                     HttpContext.Request.Method,
@@ -176,20 +179,20 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             }
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoleByIdAsync(int id, [FromBody] UpdateRolelRequestDTO updateRolelRequestDTO)
+        public async Task<IActionResult> UpdateFeatureByIdAsync(int id, [FromBody] UpdateFeatureRequestDTO updateFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar o Perfil ID: [{RoleId}]", id);
+            _logger.LogInformation("Requisição recebida para atualizar Feature ID: [{FeatureID}]", id);
 
             try
             {
-                var updatedRole = await _rolelService.UpdateRoleByIdAsync(id, updateRolelRequestDTO);
+                var updatedFeature = await _featureService.UpdateFeatureAsync(id, updateFeatureRequestDTO);
 
-                if (updatedRole is null)
+                if (updatedFeature is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
-                    "Tentativa de atualizar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Tentativa de atualizar Feature não existente ID: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -201,14 +204,14 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 
                 stopwatch.Stop();
                 _logger.LogInformation(
-                    "Perfil atualizado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    "Feature atualizada com sucesso: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,
                     stopwatch.ElapsedMilliseconds
                     );
-                return Ok(updatedRole);
+                return Ok(updatedFeature);
             }
             catch (InvalidOperationException ex)
             {
