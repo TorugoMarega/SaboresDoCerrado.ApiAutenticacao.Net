@@ -13,5 +13,6 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
         Task<bool> ExistsFeatureById(int id);
         Task<bool> ExistsFeatureByNameAsync(string name);
         Task<bool> ExistsActiveFeatureByClientSystemIdAsync(int clientSystemId);
+        Task<bool> ExistsFeatureInClientSystemByFeatureNameAsync(int clientSystemId, string featureName);
     }
 }

@@ -95,10 +95,16 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
 
         public async Task<bool> ExistsActiveFeatureByClientSystemIdAsync(int clientSystemId)
         {
-            _logger.LogDebug("Validando existencia de Features ativas para algum cliente no banco de dados");
+            _logger.LogDebug("Validando existencia de Features ativas para o [{Sistema}] no banco de dados", clientSystemId);
             return await _context.FeatureEntity
                 .AsNoTracking()
                 .AnyAsync(feat => feat.ClientSystemId == clientSystemId && feat.IsActive);
+        }
+        public async Task<bool> ExistsFeatureInClientSystemByFeatureNameAsync(int clientSystemId, string featureName){
+            _logger.LogDebug("Validando existencia de Features com o nome [{Name}] para o [{Sistema}] no banco de dados", featureName,clientSystemId);
+            return await _context.FeatureEntity
+                .AsNoTracking()
+                .AnyAsync(feat => feat.Name.ToLower() == featureName.ToLower() && feat.ClientSystemId == clientSystemId);
         }
     }
 }
