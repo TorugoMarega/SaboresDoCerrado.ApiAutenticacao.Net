@@ -50,10 +50,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                        ex.Message,
                        HttpContext.Request.Method,
                        HttpContext.Request.Path,
-                       400,
+                       409,
                        stopwatch.ElapsedMilliseconds
                    );
-                return BadRequest(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
 
         }

@@ -149,7 +149,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                         400,
                         stopwatch.ElapsedMilliseconds
                         );
-                    return BadRequest(new { mensagem = $"A Feature [{id}] já está inativa" });
+                    return Conflict(new { mensagem = $"A Feature [{id}] já está inativa" });
                 }
 
                 stopwatch.Stop();
@@ -158,7 +158,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    200,
+                    204,
                     stopwatch.ElapsedMilliseconds
                     );
                 return NoContent();

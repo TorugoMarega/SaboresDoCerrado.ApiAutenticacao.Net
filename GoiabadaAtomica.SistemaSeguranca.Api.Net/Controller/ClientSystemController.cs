@@ -94,10 +94,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     "Tentativa de cadastrar sistema finalizada sem sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    400,
+                    409,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = "Tentativa de cadastrar sistema finalizada sem sucesso" });
+                return Conflict(new { mensagem = "Tentativa de cadastrar sistema finalizada sem sucesso" });
             }
             catch (InvalidOperationException ex)
             {
@@ -107,10 +107,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     ex.GetBaseException().Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    400,
+                    409,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = ex.GetBaseException().Message });
+                return Conflict(new { mensagem = ex.GetBaseException().Message });
             }
         }
 
@@ -158,7 +158,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    200,
+                    204,
                     stopwatch.ElapsedMilliseconds
                     );
                 return NoContent();
@@ -172,10 +172,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    400,
+                    409,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = ex.Message });
+                return Conflict(new { mensagem = ex.Message });
             }
         }
         [HttpPut("{id}")]
@@ -221,10 +221,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                ex.Message,
                HttpContext.Request.Method,
                HttpContext.Request.Path,
-               400,
+               409,
                stopwatch.ElapsedMilliseconds
                );
-                return BadRequest(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
         }
     }

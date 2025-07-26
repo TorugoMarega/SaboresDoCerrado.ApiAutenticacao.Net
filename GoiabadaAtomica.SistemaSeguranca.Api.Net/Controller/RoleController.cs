@@ -104,10 +104,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     ex.GetBaseException().Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    400,
+                    409,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = ex.GetBaseException().Message });
+                return Conflict(new { mensagem = ex.GetBaseException().Message });
             }
         }
 
@@ -143,10 +143,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                         id,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
-                        400,
+                        409,
                         stopwatch.ElapsedMilliseconds
                         );
-                    return BadRequest(new { mensagem = $"O perfil [{id}] já está inativo" });
+                    return Conflict(new { mensagem = $"O perfil [{id}] já está inativo" });
                 }
 
                 stopwatch.Stop();
@@ -155,7 +155,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     id,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    200,
+                    204,
                     stopwatch.ElapsedMilliseconds
                     );
                 return NoContent();
@@ -169,10 +169,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
-                    400,
+                    409,
                     stopwatch.ElapsedMilliseconds
                     );
-                return BadRequest(new { mensagem = ex.Message });
+                return Conflict(new { mensagem = ex.Message });
             }
         }
         [HttpPut("{id}")]
@@ -218,10 +218,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                ex.Message,
                HttpContext.Request.Method,
                HttpContext.Request.Path,
-               400,
+               409,
                stopwatch.ElapsedMilliseconds
                );
-                return BadRequest(new { message = ex.Message });
+                return Conflict(new { message = ex.Message });
             }
         }
     }
