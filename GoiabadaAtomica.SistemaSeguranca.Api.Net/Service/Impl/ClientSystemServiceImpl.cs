@@ -5,6 +5,7 @@ using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Mapster;
+using System.Security.Cryptography;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
@@ -35,15 +36,24 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             clientSystemEntity.CreatedAt = DateTime.UtcNow;
             clientSystemEntity.UpdatedAt = DateTime.UtcNow;
             clientSystemEntity.IsActive = true;
+            _logger.LogInformation("Gerando client ID");
             clientSystemEntity.ClientId = Guid.NewGuid().ToString();
 
+
+            var randomNumber = RandomNumberGenerator.Create();
+            var randomBytes = new byte[32];
+
+            _logger.LogInformation("Gerando Secret");
+            randomNumber.GetBytes(randomBytes);
+
             //iremos devolver ao admin uma única vez após o cadastro
-            var secretId = Guid.NewGuid().ToString();
-            clientSystemEntity.ClientSecret = BCrypt.Net.BCrypt.HashPassword(secretId);
+            string clientSecretPlainText = Convert.ToBase64String(randomBytes);
+
+            clientSystemEntity.ClientSecret = BCrypt.Net.BCrypt.HashPassword(clientSecretPlainText);
 
             var createClientSystemResponseDTO = await _clientSystemRepository.CreateClientSystemAsync(clientSystemEntity);
-            createClientSystemResponseDTO.ClientSecret = secretId;
-
+            createClientSystemResponseDTO.ClientSecret = clientSecretPlainText;
+            _logger.LogInformation("O Sitema [{SystemName}] foi criado com sucesso. ClientId: [{ClientId}]", createClientSystemResponseDTO.Name, createClientSystemResponseDTO.ClientId);
             return createClientSystemResponseDTO;
         }
         public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync()
