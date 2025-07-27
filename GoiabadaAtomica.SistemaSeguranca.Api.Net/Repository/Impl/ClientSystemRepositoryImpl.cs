@@ -7,12 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
 {
-    public class ClientSystemRepository : IClientSystemRepository
+    public class ClientSystemRepositoryImpl : IClientSystemRepository
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly Logger<ClientSystemRepository> _logger;
+        private readonly Logger<ClientSystemRepositoryImpl> _logger;
 
-        public ClientSystemRepository(ApplicationContext applicationContext, Logger<ClientSystemRepository> logger)
+        public ClientSystemRepositoryImpl(ApplicationContext applicationContext, Logger<ClientSystemRepositoryImpl> logger)
         {
             _applicationContext = applicationContext;
             _logger = logger;
