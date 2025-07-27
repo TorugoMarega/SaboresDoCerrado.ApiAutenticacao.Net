@@ -17,20 +17,19 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _context = context;
             _logger = logger;
         }
-
-        public async Task<FeatureEntity?> GetFeatureEntityByIdAsync(int id)
+        public async Task<FeatureEntity?> GetFeatureEntityByIdAsync(int clientSystemId, int featureId)
         {
-            _logger.LogDebug("Iniciando busca de Feature pelo id [{id}]", id);
+            _logger.LogDebug("Iniciando busca de Feature pelo id [{id}]", featureId);
 
             var entity = await _context.FeatureEntity
-                .FirstOrDefaultAsync(feature => feature.Id == id);
+                .FirstOrDefaultAsync(feature => feature.Id == featureId && feature.ClientSystemId == clientSystemId);
 
             _logger.LogDebug("Busca de Feature finalizada com sucesso!");
             return entity;
         }
-        public async Task<FeatureDTO?> GetFeatureDTOByIdAsync(int id)
+        public async Task<FeatureDTO?> GetFeatureDTOByIdAsync(int clientSystemId, int featureId)
         {
-            _logger.LogDebug("Iniciando busca de Feature pelo id [{id}]", id);
+            _logger.LogDebug("Iniciando busca de Feature [{featureId}] do sistema [{clientSystemId}]", featureId, clientSystemId);
 
             var featureDTO = await _context.FeatureEntity
                 .AsNoTracking()
@@ -42,15 +41,16 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     ClientSystemId = feature.ClientSystemId,
                     IsActive = feature.IsActive
                 })
-                .FirstOrDefaultAsync(feature => feature.Id == id);
+                .FirstOrDefaultAsync(feature => feature.Id == featureId && feature.ClientSystemId == clientSystemId);
             _logger.LogDebug("Busca de Feature finalizada com sucesso!");
             return featureDTO;
         }
-        public async Task<IEnumerable<FeatureDTO>> GetAllFeatureByAsync()
+        public async Task<IEnumerable<FeatureDTO>> GetAllFeaturesAsync(int clientSystemId)
         {
-            _logger.LogDebug("Iniciando busca de todas as Features");
+            _logger.LogDebug("Iniciando busca no banco de todas as Features do sistema [{clientSystemId}]", clientSystemId);
             var featureDTOList = await _context.FeatureEntity
                 .AsNoTracking()
+                .Where(f => f.ClientSystemId == clientSystemId)
                 .Select(feature => new FeatureDTO
                 {
                     Id = feature.Id,
@@ -60,7 +60,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
                     IsActive = feature.IsActive
                 })
                 .ToListAsync();
-            _logger.LogDebug("Busca de Features finalizada com sucesso!");
+            _logger.LogDebug("Busca de Features do sistema [{clientSystemId}] finalizada com sucesso!", clientSystemId);
             return featureDTOList;
         }
         public async Task<FeatureDTO> CreateFeatureAsync(FeatureEntity feature)
@@ -76,35 +76,31 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _context.FeatureEntity.Update(feature);
             return await _context.SaveChangesAsync();
         }
-        public async Task<bool> ExistsFeatureById(int id)
+        public async Task<bool> DoesNameExistForSystemAsync(int clientSystemId, string featureName, int? featureIdToExclude = null)
         {
-            _logger.LogDebug("Validando existencia da Features no banco de dados");
-            var exists = await _context.FeatureEntity
+            _logger.LogDebug("Validando existencia de Features com o nome [{Name}] para o [{Sistema}] no banco de dados", featureName, clientSystemId);
+            var query = _context.FeatureEntity
                 .AsNoTracking()
-                .AnyAsync(feature => feature.Id.Equals(id));
-            return exists;
+                .Where(feat => feat.Name.ToLower() == featureName.ToLower() && feat.ClientSystemId == clientSystemId);
+            //validacao no update
+            if (featureIdToExclude.HasValue)
+            {
+                query = query.Where(f => f.Id != featureIdToExclude.Value);
+            }
+            return await query.AnyAsync();
         }
-        public async Task<bool> ExistsFeatureByNameAsync(string name)
+        public async Task<FeatureEntity?> GetByIdWithRolesAsync(int featureId)
         {
-            _logger.LogDebug("Validando existencia da Features no banco de dados");
-            var exists = await _context.FeatureEntity
-                .AsNoTracking()
-                .AnyAsync(feature => feature.Name.ToLower().Equals(name.ToLower()));
-            return exists;
-        }
-
-        public async Task<bool> ExistsActiveFeatureByClientSystemIdAsync(int clientSystemId)
-        {
-            _logger.LogDebug("Validando existencia de Features ativas para o [{Sistema}] no banco de dados", clientSystemId);
+            _logger.LogDebug("Buscando Feature ID [{FeatureId}] incluindo seus vinculos com Roles", featureId);
             return await _context.FeatureEntity
-                .AsNoTracking()
-                .AnyAsync(feat => feat.ClientSystemId == clientSystemId && feat.IsActive);
+                .Include(f => f.RoleFeature)
+                .FirstOrDefaultAsync(f => f.Id == featureId);
         }
-        public async Task<bool> ExistsFeatureInClientSystemByFeatureNameAsync(int clientSystemId, string featureName){
-            _logger.LogDebug("Validando existencia de Features com o nome [{Name}] para o [{Sistema}] no banco de dados", featureName,clientSystemId);
+        public async Task<bool> HasActiveFeaturesAsync(int clientSystemId)
+        {
+            _logger.LogDebug("Validando se há alguma feature ativa para o sistema [{ClientSystemId}]", clientSystemId);
             return await _context.FeatureEntity
-                .AsNoTracking()
-                .AnyAsync(feat => feat.Name.ToLower() == featureName.ToLower() && feat.ClientSystemId == clientSystemId);
+                .AnyAsync(feature => feature.ClientSystemId == clientSystemId && feature.IsActive == true);
         }
     }
 }

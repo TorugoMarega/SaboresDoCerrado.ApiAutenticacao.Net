@@ -8,7 +8,5 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Feature
         public string Name { get; set; }
         [Required(ErrorMessage = "A descrição da funcionalidade é obrigatória.")]
         public string Description { get; set; }
-        [Required(ErrorMessage = "É obrigatório associar a funcionalidade a um Sistema Cliente.")]
-        public int ClientSystemId { get; set; }
     }
 }

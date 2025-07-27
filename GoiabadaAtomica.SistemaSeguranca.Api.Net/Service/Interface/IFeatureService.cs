@@ -5,10 +5,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IFeatureService
     {
-        Task<FeatureDTO> CreateFeatureAsync(CreateFeatureRequestDTO createFeatureRequestDTO);
-        Task<FeatureDTO?> UpdateFeatureAsync(int id, UpdateFeatureRequestDTO updateFeatureRequestDTO);
-        Task<bool?> DeactivateActivateFeatureAsync(int id, bool newStatus);
-        Task<IEnumerable<FeatureDTO>> GetAllFeaturesAsync();
-        Task<FeatureDTO?> GetFeatureByIdAsync(int id);
+        Task<FeatureDTO> CreateFeatureAsync(int clientSystemId, CreateFeatureRequestDTO createFeatureRequestDTO);
+        Task<FeatureDTO?> UpdateFeatureAsync(int clientSystemId, int featureId, UpdateFeatureRequestDTO updateFeatureRequestDTO);
+        Task<FeatureDTO?> DeactivateActivateFeatureAsync(int clientSystemId, int featureId, bool newStatus);
+        Task<IEnumerable<FeatureDTO?>> GetAllFeaturesByClientSystemIdAsync(int clientSystemId);
+        Task<FeatureDTO?> GetFeatureByIdAsync(int clientSystemId, int featureId);
+        Task<bool> HasActiveFeaturesAsync(int clientSystemId);
     }
 }

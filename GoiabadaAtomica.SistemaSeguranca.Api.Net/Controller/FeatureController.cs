@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
     [Controller]
-    [Route("api/[Controller]")]
+    [Route("api/clientsystem/{clientSystemId}/[Controller]")]
     [Authorize(Roles = "Administrador")]
     public class FeatureController : ControllerBase
     {
@@ -22,11 +22,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFeaturesAsync()
+        public async Task<IActionResult> GetAllFeaturesAsync(int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todas as Features.");
-            var clientSystems = await _featureService.GetAllFeaturesAsync();
+            var clientSystems = await _featureService.GetAllFeaturesByClientSystemIdAsync(clientSystemId);
             stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
@@ -38,12 +38,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             return Ok(clientSystems);
         }
 
-        [HttpGet("{id}", Name = "GetFeatureByIdAsync")]
-        public async Task<IActionResult> GetFeatureByIdAsync(int id)
+        [HttpGet("{featureId}", Name = "GetFeatureByIdAsync")]
+        public async Task<IActionResult> GetFeatureByIdAsync(int clientSystemId, int featureId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para buscar a Feature pelo ID: [{ID}].", id);
-            var clientSystem = await _featureService.GetFeatureByIdAsync(id);
+            _logger.LogInformation("Requisição recebida para buscar a Feature [{FeatureId}] do sistema [{ClientSystemId}].", featureId, clientSystemId);
+            var clientSystem = await _featureService.GetFeatureByIdAsync(clientSystemId, featureId);
             if (clientSystem is null)
             {
                 stopwatch.Stop();
@@ -68,7 +68,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostFeatureAsync([FromBody] CreateFeatureRequestDTO createFeatureRequestDTO)
+        public async Task<IActionResult> PostFeatureAsync(int clientSystemId, [FromBody] CreateFeatureRequestDTO createFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -76,7 +76,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 
                 _logger.LogInformation("Requisição recebida para cadastrar Feature: [{name}].", createFeatureRequestDTO.Name);
 
-                var createdFeature = await _featureService.CreateFeatureAsync(createFeatureRequestDTO);
+                var createdFeature = await _featureService.CreateFeatureAsync(clientSystemId, createFeatureRequestDTO);
                 if (createdFeature is not null)
                 {
                     stopwatch.Stop();
@@ -114,22 +114,22 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeactivateFeatureById(int id)
+        [HttpDelete("{featureId}")]
+        public async Task<IActionResult> DeactivateFeatureById(int clientSystemId, int featureId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                _logger.LogInformation("Requisição recebida para INATIVAR a Feature ID: [{FeatureId}]", id);
+                _logger.LogInformation("Requisição recebida para INATIVAR a Feature ID: [{FeatureId}]", featureId);
 
-                var success = await _featureService.DeactivateActivateFeatureAsync(id, false);
+                var success = await _featureService.DeactivateActivateFeatureAsync(clientSystemId, featureId, false);
 
                 if (success is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                         "Tentativa de inativar Feature não existente ID: [{FeatureId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
+                        featureId,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
                         404,
@@ -143,19 +143,19 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     stopwatch.Stop();
                     _logger.LogWarning(
                         "Tentativa de inativar Feature finalizada sem sucesso para o ID: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
+                        featureId,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
                         400,
                         stopwatch.ElapsedMilliseconds
                         );
-                    return Conflict(new { mensagem = $"A Feature [{id}] já está inativa" });
+                    return Conflict(new { mensagem = $"A Feature [{featureId}] já está inativa" });
                 }
 
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Feature inativada com sucesso: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    featureId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     204,
@@ -168,7 +168,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 stopwatch.Stop();
                 _logger.LogWarning(
                     "Tentativa de inativar Feature finalizada sem sucesso para o ID: [{FeatureID}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    featureId,
                     ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -178,22 +178,22 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 return BadRequest(new { mensagem = ex.Message });
             }
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFeatureByIdAsync(int id, [FromBody] UpdateFeatureRequestDTO updateFeatureRequestDTO)
+        [HttpPut("{featureId}")]
+        public async Task<IActionResult> UpdateFeatureByIdAsync(int clientSystemId, int featureId, [FromBody] UpdateFeatureRequestDTO updateFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar Feature ID: [{FeatureID}]", id);
+            _logger.LogInformation("Requisição recebida para atualizar Feature ID: [{FeatureID}]", featureId);
 
             try
             {
-                var updatedFeature = await _featureService.UpdateFeatureAsync(id, updateFeatureRequestDTO);
+                var updatedFeature = await _featureService.UpdateFeatureAsync(clientSystemId, featureId, updateFeatureRequestDTO);
 
                 if (updatedFeature is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                     "Tentativa de atualizar Feature não existente ID: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    featureId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -205,7 +205,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Feature atualizada com sucesso: [{FeatureID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    featureId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,

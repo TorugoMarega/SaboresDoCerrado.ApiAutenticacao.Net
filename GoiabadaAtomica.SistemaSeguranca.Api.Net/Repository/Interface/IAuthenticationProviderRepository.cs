@@ -2,6 +2,6 @@
 {
     public interface IAuthenticationProviderRepository
     {
-        Task<bool> ExistsActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId);
+        Task<bool> HasActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId);
     }
 }

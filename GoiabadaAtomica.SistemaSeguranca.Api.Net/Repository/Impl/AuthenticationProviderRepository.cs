@@ -15,12 +15,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _context = context;
         }
 
-        public async Task<bool> ExistsActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId)
+        public async Task<bool> HasActiveAuthenticationProviderByClientSystemIdAsync(int clientSystemId)
         {
             return await _context.AuthenticationProvider
                 .AsNoTracking()
                 .AnyAsync(ap => ap.ClientSystemId == clientSystemId);
-
         }
     }
 }

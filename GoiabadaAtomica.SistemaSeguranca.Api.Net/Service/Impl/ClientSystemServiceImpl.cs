@@ -1,7 +1,6 @@
 ﻿using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.ClientSystem;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response.ClientSystem;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity;
-using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Mapster;
@@ -11,16 +10,16 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
     public class ClientSystemServiceImpl : IClientSystemService
     {
-        private readonly ClientSystemRepositoryImpl _clientSystemRepository;
-        private readonly IFeatureRepository _featureRepository;
+        private readonly IClientSystemRepository _clientSystemRepository;
+        private readonly IFeatureService _featureService;
         private readonly IAuthenticationProviderRepository _authenticationProviderRepository;
-        private readonly ILogger<ClientSystemRepositoryImpl> _logger;
+        private readonly ILogger<IClientSystemService> _logger;
 
-        public ClientSystemServiceImpl(ClientSystemRepositoryImpl clientSystemRepository, ILogger<ClientSystemRepositoryImpl> logger, IFeatureRepository featureRepository, IAuthenticationProviderRepository authenticationProviderRepository)
+        public ClientSystemServiceImpl(IClientSystemRepository clientSystemRepository, ILogger<IClientSystemService> logger, IFeatureService featureService, IAuthenticationProviderRepository authenticationProviderRepository)
         {
             _clientSystemRepository = clientSystemRepository;
             _logger = logger;
-            _featureRepository = featureRepository;
+            _featureService = featureService;
             _authenticationProviderRepository = authenticationProviderRepository;
         }
 
@@ -115,20 +114,28 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
             return true;
         }
-
+        public async Task<bool> ExistsClientSystemByIdAsync(int clientSystemId)
+        {
+            _logger.LogInformation("Verificando existência do Sistema [{ClientSystemId}]", clientSystemId);
+            return await _clientSystemRepository.ExistsClientSystemById(clientSystemId);
+        }
         private async Task ValidationDeactivateActivateClientSystemAsync(int clientSystemId, bool newStatus)
         {
-            _logger.LogDebug("Executando validação de dependências para o ClientSystem ID: [{Id}]", clientSystemId);
-            if (newStatus.Equals(false))
-            {
-                if (await _authenticationProviderRepository.ExistsActiveAuthenticationProviderByClientSystemIdAsync(clientSystemId))
-                {
-                    throw new InvalidOperationException("Este sistema não pode ser inativado pois possui funcionalidades ativas.");
-                }
+            _logger.LogDebug("Executando validação de dependências para o ClientSystem ID: [{ClientSystemiD}]", clientSystemId);
 
-                if (await _featureRepository.ExistsActiveFeatureByClientSystemIdAsync(clientSystemId))
+            // A validação só acontece se estivermos tentando INATIVAR o sistema.
+            if (newStatus == false)
+            {
+                // Validação 1: Provedores de Autenticação
+                if (await _authenticationProviderRepository.HasActiveAuthenticationProviderByClientSystemIdAsync(clientSystemId))
                 {
                     throw new InvalidOperationException("Este sistema não pode ser inativado pois possui provedores de autenticação ativos associados.");
+                }
+
+                // Validação 2: Funcionalidades (Features)
+                if (await _featureService.HasActiveFeaturesAsync(clientSystemId))
+                {
+                    throw new InvalidOperationException("Este sistema não pode ser inativado pois possui funcionalidades ativas.");
                 }
             }
         }

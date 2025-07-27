@@ -8,5 +8,6 @@
         public bool IsActive { get; set; }
         public int? ClientSystemId { get; set; }
         public ClientSystemEntity ClientSystem { get; set; }
+        public ICollection<RoleFeatureEntity> RoleFeature { get; set; }
     }
 }
