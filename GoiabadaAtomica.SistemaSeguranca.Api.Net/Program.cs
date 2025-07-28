@@ -27,11 +27,12 @@ Log.Information("Iniciando a API de Segurança");
 var builder = WebApplication.CreateBuilder(args);
 
 // Limpa os provedores de log padrão e usa o Serilog.
+builder.Logging.ClearProviders();
+
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration) // Lê appsettings.json
     .ReadFrom.Services(services)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()); // Configura a saída para o console
+    .Enrich.FromLogContext());
 
 // --- SWAGGER ---
 // Add services to the container.
