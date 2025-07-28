@@ -74,12 +74,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
                 return null;
             }
 
-            if (role.Status.Equals(newStatus))
+            if (role.IsActive.Equals(newStatus))
             {
                 return false;
             }
 
-            role.Status = newStatus;
+            role.IsActive = newStatus;
             await _roleRepository.SaveChangesAsync();
 
             return true;
@@ -93,7 +93,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             }
 
             var role = _mapper.Map<RoleEntity>(postRoleRequestDTO);
-            role.Status = true;
+            role.IsActive = true;
 
             var newRoleEntity = await _roleRepository.CreateRolelAsync(role);
 
