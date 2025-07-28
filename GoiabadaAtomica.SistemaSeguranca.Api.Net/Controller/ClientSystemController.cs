@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
     [ApiController]
-    [Route("/api/[controller]")]
+    [Route("api/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class ClientSystemController : ControllerBase
     {

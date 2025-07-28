@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 {
     [ApiController]
-    [Route("/api/[controller]")]
+    [Route("api/clientsystem/{clientSystemId}/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class RoleController : ControllerBase
     {
@@ -20,7 +20,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRolesAsync()
+        public async Task<IActionResult> GetAllRolesAsync(int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todos os perfis.");
