@@ -10,9 +10,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
     public class FeatureRepositoryImpl : IFeatureRepository
     {
         private readonly ApplicationContext _context;
-        private readonly ILogger<IFeatureRepository> _logger;
+        private readonly ILogger<FeatureRepositoryImpl> _logger;
 
-        public FeatureRepositoryImpl(ApplicationContext context, ILogger<IFeatureRepository> logger)
+        public FeatureRepositoryImpl(ApplicationContext context, ILogger<FeatureRepositoryImpl> logger)
         {
             _context = context;
             _logger = logger;

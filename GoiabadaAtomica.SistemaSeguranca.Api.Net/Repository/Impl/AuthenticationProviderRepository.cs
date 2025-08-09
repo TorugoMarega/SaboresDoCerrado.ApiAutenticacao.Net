@@ -6,10 +6,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
 {
     public class AuthenticationProviderRepository : IAuthenticationProviderRepository
     {
-        private readonly ILogger<IAuthenticationProviderRepository> _logger;
+        private readonly ILogger<AuthenticationProviderRepository> _logger;
         private ApplicationContext _context;
 
-        public AuthenticationProviderRepository(ILogger<IAuthenticationProviderRepository> logger, ApplicationContext context)
+        public AuthenticationProviderRepository(ILogger<AuthenticationProviderRepository> logger, ApplicationContext context)
         {
             _logger = logger;
             _context = context;

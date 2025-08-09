@@ -10,11 +10,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 {
     public class FeatureServiceImpl : IFeatureService
     {
-        private readonly ILogger<IFeatureService> _logger;
+        private readonly ILogger<FeatureServiceImpl> _logger;
         private readonly FeatureRepositoryImpl _featureRepository;
         private readonly IClientSystemService _clientSystemService;
 
-        public FeatureServiceImpl(ILogger<IFeatureService> logger, FeatureRepositoryImpl featureRepository, IClientSystemService clientSystemService)
+        public FeatureServiceImpl(ILogger<FeatureServiceImpl> logger, FeatureRepositoryImpl featureRepository, IClientSystemService clientSystemService)
         {
             _logger = logger;
             _featureRepository = featureRepository;

@@ -13,9 +13,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
         private readonly IClientSystemRepository _clientSystemRepository;
         private readonly IFeatureService _featureService;
         private readonly IAuthenticationProviderRepository _authenticationProviderRepository;
-        private readonly ILogger<IClientSystemService> _logger;
+        private readonly ILogger<ClientSystemServiceImpl> _logger;
 
-        public ClientSystemServiceImpl(IClientSystemRepository clientSystemRepository, ILogger<IClientSystemService> logger, IFeatureService featureService, IAuthenticationProviderRepository authenticationProviderRepository)
+        public ClientSystemServiceImpl(IClientSystemRepository clientSystemRepository, ILogger<ClientSystemServiceImpl> logger, IFeatureService featureService, IAuthenticationProviderRepository authenticationProviderRepository)
         {
             _clientSystemRepository = clientSystemRepository;
             _logger = logger;

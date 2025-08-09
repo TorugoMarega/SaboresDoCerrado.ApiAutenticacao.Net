@@ -10,9 +10,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
     public class TenantServiceImpl : ITenantService
     {
         private readonly ITenantRepository _tenantRepository;
-        private readonly ILogger<ITenantService> _logger;
+        private readonly ILogger<TenantServiceImpl> _logger;
 
-        public TenantServiceImpl(ITenantRepository tenantRepository, ILogger<ITenantService> logger)
+        public TenantServiceImpl(ITenantRepository tenantRepository, ILogger<TenantServiceImpl> logger)
         {
             _logger = logger;
             _tenantRepository = tenantRepository;

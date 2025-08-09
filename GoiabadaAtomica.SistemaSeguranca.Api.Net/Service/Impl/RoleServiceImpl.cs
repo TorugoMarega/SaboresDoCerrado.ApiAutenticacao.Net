@@ -10,10 +10,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
     public class RoleServiceImpl : IRoleService
     {
         private readonly IRoleRepository _roleRepository;
-        private readonly ILogger<IRoleService> _logger;
+        private readonly ILogger<RoleServiceImpl> _logger;
         private readonly IMapper _mapper;
 
-        public RoleServiceImpl(IRoleRepository roleRepository, ILogger<IRoleService> logger, IMapper mapper)
+        public RoleServiceImpl(IRoleRepository roleRepository, ILogger<RoleServiceImpl> logger, IMapper mapper)
         {
             _roleRepository = roleRepository;
             _logger = logger;

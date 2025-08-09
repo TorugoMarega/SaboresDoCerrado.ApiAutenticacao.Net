@@ -9,9 +9,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
     public class RoleRepositoryImpl : IRoleRepository
     {
         private readonly ApplicationContext _context;
-        private readonly ILogger<IRoleRepository> _logger;
+        private readonly ILogger<RoleRepositoryImpl> _logger;
 
-        public RoleRepositoryImpl(ApplicationContext context, ILogger<IRoleRepository> logger)
+        public RoleRepositoryImpl(ApplicationContext context, ILogger<RoleRepositoryImpl> logger)
         {
             _context = context;
             _logger = logger;
