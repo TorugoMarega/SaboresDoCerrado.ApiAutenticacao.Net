@@ -94,7 +94,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             if (feature.IsActive == newStatus)
             {
                 var statusText = newStatus ? "ativa" : "inativa";
-                _logger.LogWarning("Tentativa de alterar o status da Feature ID [{FeatureId}], mas ela já está {Status}", feature.Id, statusText);
+                _logger.LogWarning("Tentativa de alterar o status da Feature ID [{FeatureId}], mas ela já está [{Status}]", feature.Id, statusText);
                 throw new InvalidOperationException($"Esta funcionalidade já está {statusText}.");
             }
 

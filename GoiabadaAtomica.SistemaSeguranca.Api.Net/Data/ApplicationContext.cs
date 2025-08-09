@@ -13,6 +13,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Data
         public DbSet<ClientSystemEntity> ClientSystemEntity { get; set; }
         public DbSet<FeatureEntity> FeatureEntity { get; set; }
         public DbSet<AuthenticationProviderEntity> AuthenticationProvider { get; set; }
+        public DbSet<TenantEntity> TenantEntity { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -74,6 +75,12 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Data
             {
                 entity.ToTable("tbl_user_x_provider");
                 entity.HasKey(up => new { up.UserId, up.AuthenticationProviderId });
+            });
+            //TenantEntity
+            modelBuilder.Entity<TenantEntity>(entity =>
+            {
+                entity.ToTable("tbl_tenants");
+                entity.HasIndex(f => f.Name).IsUnique();
             });
         }
     }

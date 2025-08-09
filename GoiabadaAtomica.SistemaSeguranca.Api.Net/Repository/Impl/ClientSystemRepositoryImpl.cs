@@ -10,9 +10,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
     public class ClientSystemRepositoryImpl : IClientSystemRepository
     {
         private readonly ApplicationContext _applicationContext;
-        private readonly Logger<ClientSystemRepositoryImpl> _logger;
+        private readonly Logger<IClientSystemRepository> _logger;
 
-        public ClientSystemRepositoryImpl(ApplicationContext applicationContext, Logger<ClientSystemRepositoryImpl> logger)
+        public ClientSystemRepositoryImpl(ApplicationContext applicationContext, Logger<IClientSystemRepository> logger)
         {
             _applicationContext = applicationContext;
             _logger = logger;

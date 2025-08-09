@@ -52,7 +52,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
 
             var createClientSystemResponseDTO = await _clientSystemRepository.CreateClientSystemAsync(clientSystemEntity);
             createClientSystemResponseDTO.ClientSecret = clientSecretPlainText;
-            _logger.LogInformation("O Sitema [{SystemName}] foi criado com sucesso. ClientId: [{ClientId}]", createClientSystemResponseDTO.Name, createClientSystemResponseDTO.ClientId);
+            _logger.LogInformation("O Sistema [{SystemName}] foi criado com sucesso. ClientId: [{ClientId}]", createClientSystemResponseDTO.Name, createClientSystemResponseDTO.ClientId);
             return createClientSystemResponseDTO;
         }
         public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync()
@@ -92,6 +92,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             await ValidationDeactivateActivateClientSystemAsync(id, updateClientSystemRequestDTO.IsActive);
 
             clientSystemEntity.IsActive = updateClientSystemRequestDTO.IsActive;
+
             _logger.LogInformation("Atualizando dados do Sistema [{ID}] no banco de dados", id);
             await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
             _logger.LogInformation("Retornando Sistema [{ID}] no banco de dados", id);

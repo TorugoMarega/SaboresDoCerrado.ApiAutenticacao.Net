@@ -2,6 +2,7 @@
 using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Auth;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response.Auth;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using MapsterMapper;
@@ -17,10 +18,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IConfiguration _configuration;
-        private readonly ILogger<AuthServiceImpl> _logger;
+        private readonly ILogger<IAuthService> _logger;
         private readonly IMapper _mapper;
 
-        public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<AuthServiceImpl> logger, IMapper mapper)
+        public AuthServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, IConfiguration configuration, ILogger<IAuthService> logger, IMapper mapper)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;

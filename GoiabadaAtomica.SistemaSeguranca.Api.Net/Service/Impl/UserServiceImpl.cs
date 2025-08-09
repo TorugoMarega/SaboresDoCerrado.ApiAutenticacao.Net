@@ -11,9 +11,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
-        private readonly ILogger<UserServiceImpl> _logger;
+        private readonly ILogger<IUserService> _logger;
 
-        public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, ILogger<UserServiceImpl> logger)
+        public UserServiceImpl(IUserRepository userRepository, IRoleRepository roleRepository, ILogger<IUserService> logger)
         {
             _userRepository = userRepository;
             _roleRepository = roleRepository;

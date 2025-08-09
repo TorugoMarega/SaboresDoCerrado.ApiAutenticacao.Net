@@ -93,6 +93,9 @@ builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 
 builder.Services.AddScoped<IUserService, UserServiceImpl>();
 
+builder.Services.AddScoped<ITenantService, TenantServiceImpl>();
+builder.Services.AddScoped<ITenantRepository, TenantRepositoryImpl>();
+
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
