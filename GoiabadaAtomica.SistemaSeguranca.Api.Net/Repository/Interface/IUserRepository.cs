@@ -15,5 +15,6 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
         Task<bool> DeactivateActivateUserAsync(int id, bool status);
         Task<bool> EmailExistsInAnotherUserAsync(int id, string email);
         Task UpdateUserAsync(UserEntity user);
+        Task<UserEntity?> GetByUsernameWithTenantAsync(string username);
     }
 }

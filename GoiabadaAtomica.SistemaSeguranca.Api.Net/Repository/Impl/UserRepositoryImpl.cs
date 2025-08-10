@@ -102,5 +102,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
             _applicationContext.UserEntity.Update(user);
             await _applicationContext.SaveChangesAsync();
         }
+
+        public async Task<UserEntity?> GetByUsernameWithTenantAsync(string username)
+        {
+            return await _applicationContext.UserEntity
+                .Include(u => u.Tenant) // carrega os dados da empresa
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
     }
 }

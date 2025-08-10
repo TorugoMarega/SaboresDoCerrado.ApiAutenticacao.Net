@@ -79,7 +79,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
         {
             _logger.LogInformation("Iniciando tentativa de login para o usuário [{username}]", loginRequestDTO.Username);
 
-            var user = await _userRepository.GetUserByUsernameAsync(loginRequestDTO.Username);
+            var user = await _userRepository.GetByUsernameWithTenantAsync(loginRequestDTO.Username);
 
             if (user is null)
             {
@@ -90,6 +90,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             if (user.IsActive is false)
             {
                 var loginMsg = $"Usuário [{loginRequestDTO.Username}] está inativo, por favor entre em contato com um Administrador!";
+                _logger.LogWarning("Tentativa de login falhou: {msg}", loginMsg);
+                throw new InvalidOperationException(loginMsg);
+            }
+            if (user.Tenant.IsActive is false)
+            {
+                var loginMsg = $"A empresa [{user.Tenant.Name}] do Usuário [{loginRequestDTO.Username}] está inativa, por favor entre em contato com um Administrador!";
                 _logger.LogWarning("Tentativa de login falhou: {msg}", loginMsg);
                 throw new InvalidOperationException(loginMsg);
             }

@@ -1,10 +1,14 @@
 ﻿using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Tenant;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize(Roles = "Administrador")]
     public class TenantController : ControllerBase
     {
         private readonly ITenantService _tenantService;
