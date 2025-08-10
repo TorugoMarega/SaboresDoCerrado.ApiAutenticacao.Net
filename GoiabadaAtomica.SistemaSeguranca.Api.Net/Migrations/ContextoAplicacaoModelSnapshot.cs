@@ -328,7 +328,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("tbl_tenants");
+                    b.ToTable("tbl_tenants", (string)null);
                 });
 
             modelBuilder.Entity("GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity.UserProviderEntity", b =>
