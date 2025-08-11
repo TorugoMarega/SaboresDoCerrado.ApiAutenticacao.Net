@@ -1,4 +1,7 @@
-﻿namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity
 {
     public class FeatureEntity
     {

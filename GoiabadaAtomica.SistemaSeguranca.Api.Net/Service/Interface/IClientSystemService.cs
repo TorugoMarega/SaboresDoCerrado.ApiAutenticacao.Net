@@ -5,11 +5,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IClientSystemService
     {
-        Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(CreateClientSystemRequestDTO createClientSystemRequestDTO);
-        Task<ClientSystemDTO?> UpdateClientSystemAsync(int id, UpdateClientSystemRequestDTO updateClientSystemRequestDTO);
-        Task<bool?> DeactivateActivateClientSystemAsync(int id, bool newStatus);
-        Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync();
-        Task<ClientSystemDTO?> GetClientSystemByIdAsync(int id);
-        Task<bool> ExistsClientSystemByIdAsync(int clientSystemId);
+        Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(int tenantId, CreateClientSystemRequestDTO createClientSystemRequestDTO);
+        Task<ClientSystemDTO?> UpdateClientSystemAsync(int tenantId, int clientSystemId, UpdateClientSystemRequestDTO updateClientSystemRequestDTO);
+        Task<bool?> DeactivateActivateClientSystemAsync(int tenantId, int clientSystemId, bool newStatus);
+        Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync(int tenantId);
+        Task<ClientSystemDTO?> GetClientSystemByIdAsync(int tenantId, int clientSystemId);
+        Task<bool> ExistsClientSystemByIdAsync(int tenantId, int clientSystemId);
     }
 }

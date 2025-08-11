@@ -5,13 +5,13 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface
 {
     public interface IClientSystemRepository
     {
-        Task<ClientSystemEntity?> GetClientSystemEntityByIdAsync(int id);
-        Task<ClientSystemDTO?> GetClientSystemDTOByIdAsync(int id);
-        Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemByAsync();
+        Task<ClientSystemEntity?> GetClientSystemEntityByIdAsync(int tenantId, int id);
+        Task<ClientSystemDTO?> GetClientSystemDTOByIdAsync(int tenantId, int clientSystemId);
+        Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemByAsync(int tenantId);
         Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(ClientSystemEntity clientSystem);
         Task<int> UpdateClientSystemAsync(ClientSystemEntity clientSystem);
-        Task<bool> ExistsClientSystemById(int id);
-        Task<bool> ExistsClientSystemByNameAsync(string name);
-        Task<bool> ExistsClientSystemByClientIdAsync(string clientId);
+        Task<bool> ExistsClientSystemById(int tenantId, int clientSystemId);
+        Task<bool> ExistsClientSystemByNameAsync(int tenantId, string clientSystemName);
+        Task<bool> ExistsClientSystemByClientIdAsync(int tenantId, string clientId);
     }
 }

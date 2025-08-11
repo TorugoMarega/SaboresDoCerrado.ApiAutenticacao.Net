@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tenant/{tenantId}/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class ClientSystemController : ControllerBase
     {
@@ -22,11 +22,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllClientSystemsAsync()
+        public async Task<IActionResult> GetAllClientSystemsAsync(int tenantId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para listar todos os perfis.");
-            var clientSystems = await _clientSystemService.GetAllClientSystemAsync();
+            _logger.LogInformation("Requisição recebida para listar todos os perfis da empresa [{tenantId}].", tenantId);
+            var clientSystems = await _clientSystemService.GetAllClientSystemAsync(tenantId);
             stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
@@ -38,12 +38,12 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             return Ok(clientSystems);
         }
 
-        [HttpGet("{id}", Name = "GetClientSystemByIdAsync")]
-        public async Task<IActionResult> GetClientSystemByIdAsync(int id)
+        [HttpGet("{clientSystemId}", Name = "GetClientSystemByIdAsync")]
+        public async Task<IActionResult> GetClientSystemByIdAsync(int tenantId, int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para buscar o Sistema pelo ID: [{ID}].", id);
-            var clientSystem = await _clientSystemService.GetClientSystemByIdAsync(id);
+            _logger.LogInformation("Requisição recebida para buscar o Sistema pelo ID: [{ID}].", clientSystemId);
+            var clientSystem = await _clientSystemService.GetClientSystemByIdAsync(tenantId, clientSystemId);
             if (clientSystem is null)
             {
                 stopwatch.Stop();
@@ -68,7 +68,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostClientSystemAsync([FromBody] CreateClientSystemRequestDTO postClientSystemRequestDTO)
+        public async Task<IActionResult> PostClientSystemAsync(int tenantId, [FromBody] CreateClientSystemRequestDTO postClientSystemRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -76,7 +76,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 
                 _logger.LogInformation("Requisição recebida para cadastrar sistema: [{name}].", postClientSystemRequestDTO.Name);
 
-                var createdSystem = await _clientSystemService.CreateClientSystemAsync(postClientSystemRequestDTO);
+                var createdSystem = await _clientSystemService.CreateClientSystemAsync(tenantId,postClientSystemRequestDTO);
                 if (createdSystem is not null)
                 {
                     stopwatch.Stop();
@@ -114,22 +114,22 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeactivateClientSystemById(int id)
+        [HttpDelete("{clientSystemId}")]
+        public async Task<IActionResult> DeactivateClientSystemById(int tenantId, int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                _logger.LogInformation("Requisição recebida para INATIVAR o sistema ID: [{TenantId}]", id);
+                _logger.LogInformation("Requisição recebida para INATIVAR o sistema ID: [{TenantId}]", clientSystemId);
 
-                var success = await _clientSystemService.DeactivateActivateClientSystemAsync(id, false);
+                var success = await _clientSystemService.DeactivateActivateClientSystemAsync(tenantId, clientSystemId, false);
 
                 if (success is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                         "Tentativa de inativar sistema não existente ID: [{TenantId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
+                        clientSystemId,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
                         404,
@@ -143,19 +143,19 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                     stopwatch.Stop();
                     _logger.LogWarning(
                         "Tentativa de inativar sistema finalizada sem sucesso para o ID: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
+                        clientSystemId,
                         HttpContext.Request.Method,
                         HttpContext.Request.Path,
                         400,
                         stopwatch.ElapsedMilliseconds
                         );
-                    return BadRequest(new { mensagem = $"O sistema [{id}] já está inativo" });
+                    return BadRequest(new { mensagem = $"O sistema [{clientSystemId}] já está inativo" });
                 }
 
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Sistema inativado com sucesso: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    clientSystemId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     204,
@@ -168,7 +168,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 stopwatch.Stop();
                 _logger.LogWarning(
                     "Tentativa de inativar sistema finalizada sem sucesso para o ID: [{ClientSystemID}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    clientSystemId,
                     ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
@@ -178,22 +178,22 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 return Conflict(new { mensagem = ex.Message });
             }
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateClientSystemsByIdAsync(int id, [FromBody] UpdateClientSystemRequestDTO UpdateClientSystemRequestDTO)
+        [HttpPut("{clientSystemId}")]
+        public async Task<IActionResult> UpdateClientSystemsByIdAsync(int tenantId, int clientSystemId, [FromBody] UpdateClientSystemRequestDTO UpdateClientSystemRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar sistema ID: [{ClientSystemID}]", id);
+            _logger.LogInformation("Requisição recebida para atualizar sistema ID: [{ClientSystemID}]", clientSystemId);
 
             try
             {
-                var updatedClientSystems = await _clientSystemService.UpdateClientSystemAsync(id, UpdateClientSystemRequestDTO);
+                var updatedClientSystems = await _clientSystemService.UpdateClientSystemAsync(tenantId, clientSystemId, UpdateClientSystemRequestDTO);
 
                 if (updatedClientSystems is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                     "Tentativa de atualizar sistema não existente ID: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    clientSystemId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -205,7 +205,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Sistema atualizado com sucesso: [{ClientSystemID}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    clientSystemId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,

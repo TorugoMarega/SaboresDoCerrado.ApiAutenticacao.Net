@@ -23,10 +23,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             _authenticationProviderRepository = authenticationProviderRepository;
         }
 
-        public async Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(CreateClientSystemRequestDTO createClientSystemRequestDTO)
+        public async Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(int tenantId,CreateClientSystemRequestDTO createClientSystemRequestDTO)
         {
             _logger.LogInformation("Validando o nome do sistema");
-            if (await _clientSystemRepository.ExistsClientSystemByNameAsync(createClientSystemRequestDTO.Name))
+            if (await _clientSystemRepository.ExistsClientSystemByNameAsync(tenantId,createClientSystemRequestDTO.Name))
             {
                 throw new InvalidOperationException($"O nome [{createClientSystemRequestDTO.Name}] já está em uso por outro sistema já cadastrado anteriormente!");
             }
@@ -55,31 +55,31 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             _logger.LogInformation("O Sistema [{SystemName}] foi criado com sucesso. ClientId: [{ClientId}]", createClientSystemResponseDTO.Name, createClientSystemResponseDTO.ClientId);
             return createClientSystemResponseDTO;
         }
-        public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync()
+        public async Task<IEnumerable<ClientSystemDTO>> GetAllClientSystemAsync(int tenantId)
         {
             _logger.LogInformation("Iniciando listagem de Sistemas");
-            return await _clientSystemRepository.GetAllClientSystemByAsync();
+            return await _clientSystemRepository.GetAllClientSystemByAsync(tenantId);
         }
-        public async Task<ClientSystemDTO?> GetClientSystemByIdAsync(int id)
+        public async Task<ClientSystemDTO?> GetClientSystemByIdAsync(int tenantId, int clientSystemId)
         {
-            var clientSystem = await _clientSystemRepository.GetClientSystemDTOByIdAsync(id);
+            var clientSystem = await _clientSystemRepository.GetClientSystemDTOByIdAsync(tenantId, clientSystemId);
             if (clientSystem == null)
             {
                 return null;
             }
             return clientSystem;
         }
-        public async Task<ClientSystemDTO?> UpdateClientSystemAsync(int id, UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
+        public async Task<ClientSystemDTO?> UpdateClientSystemAsync(int tenantId,int clientSystemId, UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
         {
-            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", id);
+            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", clientSystemId);
 
-            var nameInUse = await _clientSystemRepository.ExistsClientSystemByNameAsync(updateClientSystemRequestDTO.Name);
+            var nameInUse = await _clientSystemRepository.ExistsClientSystemByNameAsync(tenantId, updateClientSystemRequestDTO.Name);
             if (nameInUse)
             {
                 throw new InvalidOperationException($"O nome {updateClientSystemRequestDTO.Name} já está em uso");
             }
 
-            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(id);
+            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(tenantId, clientSystemId);
             if (clientSystemEntity == null)
             {
                 return null;
@@ -89,36 +89,36 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             clientSystemEntity.Description = updateClientSystemRequestDTO.Description;
 
             //validacoes
-            await ValidationDeactivateActivateClientSystemAsync(id, updateClientSystemRequestDTO.IsActive);
+            await ValidationDeactivateActivateClientSystemAsync(clientSystemId, updateClientSystemRequestDTO.IsActive);
 
             clientSystemEntity.IsActive = updateClientSystemRequestDTO.IsActive;
 
-            _logger.LogInformation("Atualizando dados do Sistema [{ID}] no banco de dados", id);
+            _logger.LogInformation("Atualizando dados do Sistema [{ID}] no banco de dados", clientSystemId);
             await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
-            _logger.LogInformation("Retornando Sistema [{ID}] no banco de dados", id);
-            return await _clientSystemRepository.GetClientSystemDTOByIdAsync(id);
+            _logger.LogInformation("Retornando Sistema [{ID}] no banco de dados", clientSystemId);
+            return await _clientSystemRepository.GetClientSystemDTOByIdAsync(tenantId, clientSystemId);
         }
-        public async Task<bool?> DeactivateActivateClientSystemAsync(int id, bool newStatus)
+        public async Task<bool?> DeactivateActivateClientSystemAsync(int tenantId, int clientSystemId, bool newStatus)
         {
-            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", id);
-            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(id);
+            _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", clientSystemId);
+            var clientSystemEntity = await _clientSystemRepository.GetClientSystemEntityByIdAsync(tenantId, clientSystemId);
             if (clientSystemEntity == null)
             {
                 return null;
             }
 
             //regras de validacao
-            await ValidationDeactivateActivateClientSystemAsync(id, newStatus);
+            await ValidationDeactivateActivateClientSystemAsync(clientSystemId, newStatus);
 
             clientSystemEntity.IsActive = newStatus;
 
             await _clientSystemRepository.UpdateClientSystemAsync(clientSystemEntity);
             return true;
         }
-        public async Task<bool> ExistsClientSystemByIdAsync(int clientSystemId)
+        public async Task<bool> ExistsClientSystemByIdAsync(int tenantId, int clientSystemId)
         {
             _logger.LogInformation("Verificando existência do Sistema [{ClientSystemId}]", clientSystemId);
-            return await _clientSystemRepository.ExistsClientSystemById(clientSystemId);
+            return await _clientSystemRepository.ExistsClientSystemById(tenantId, clientSystemId);
         }
         private async Task ValidationDeactivateActivateClientSystemAsync(int clientSystemId, bool newStatus)
         {

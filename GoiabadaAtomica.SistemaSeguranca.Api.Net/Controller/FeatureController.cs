@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 {
     [Controller]
-    [Route("api/clientsystem/{clientSystemId}/[Controller]")]
+    [Route("api/tenant/{tenantId}/clientsystem/{clientSystemId}/[Controller]")]
     [Authorize(Roles = "Administrador")]
     public class FeatureController : ControllerBase
     {
@@ -22,11 +22,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFeaturesAsync(int clientSystemId)
+        public async Task<IActionResult> GetAllFeaturesAsync(int tenantId, int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todas as Features.");
-            var clientSystems = await _featureService.GetAllFeaturesByClientSystemIdAsync(clientSystemId);
+            var clientSystems = await _featureService.GetAllFeaturesByClientSystemIdAsync(tenantId, clientSystemId);
             stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
@@ -39,11 +39,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpGet("{featureId}", Name = "GetFeatureByIdAsync")]
-        public async Task<IActionResult> GetFeatureByIdAsync(int clientSystemId, int featureId)
+        public async Task<IActionResult> GetFeatureByIdAsync(int tenantId, int clientSystemId, int featureId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para buscar a Feature [{FeatureId}] do sistema [{ClientSystemId}].", featureId, clientSystemId);
-            var clientSystem = await _featureService.GetFeatureByIdAsync(clientSystemId, featureId);
+            var clientSystem = await _featureService.GetFeatureByIdAsync(tenantId, clientSystemId, featureId);
             if (clientSystem is null)
             {
                 stopwatch.Stop();
@@ -68,7 +68,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostFeatureAsync(int clientSystemId, [FromBody] CreateFeatureRequestDTO createFeatureRequestDTO)
+        public async Task<IActionResult> PostFeatureAsync(int tenantId, int clientSystemId, [FromBody] CreateFeatureRequestDTO createFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -76,7 +76,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 
                 _logger.LogInformation("Requisição recebida para cadastrar Feature: [{name}].", createFeatureRequestDTO.Name);
 
-                var createdFeature = await _featureService.CreateFeatureAsync(clientSystemId, createFeatureRequestDTO);
+                var createdFeature = await _featureService.CreateFeatureAsync(tenantId, clientSystemId, createFeatureRequestDTO);
                 if (createdFeature is not null)
                 {
                     stopwatch.Stop();
@@ -115,14 +115,14 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
         }
 
         [HttpDelete("{featureId}")]
-        public async Task<IActionResult> DeactivateFeatureById(int clientSystemId, int featureId)
+        public async Task<IActionResult> DeactivateFeatureById(int tenantId, int clientSystemId, int featureId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 _logger.LogInformation("Requisição recebida para INATIVAR a Feature ID: [{FeatureId}]", featureId);
 
-                var success = await _featureService.DeactivateActivateFeatureAsync(clientSystemId, featureId, false);
+                var success = await _featureService.DeactivateActivateFeatureAsync(tenantId, clientSystemId, featureId, false);
 
                 if (success is null)
                 {
@@ -179,14 +179,14 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
             }
         }
         [HttpPut("{featureId}")]
-        public async Task<IActionResult> UpdateFeatureByIdAsync(int clientSystemId, int featureId, [FromBody] UpdateFeatureRequestDTO updateFeatureRequestDTO)
+        public async Task<IActionResult> UpdateFeatureByIdAsync(int tenantId, int clientSystemId, int featureId, [FromBody] UpdateFeatureRequestDTO updateFeatureRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para atualizar Feature ID: [{FeatureID}]", featureId);
 
             try
             {
-                var updatedFeature = await _featureService.UpdateFeatureAsync(clientSystemId, featureId, updateFeatureRequestDTO);
+                var updatedFeature = await _featureService.UpdateFeatureAsync(tenantId, clientSystemId, featureId, updateFeatureRequestDTO);
 
                 if (updatedFeature is null)
                 {
