@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Impl
 {
-    public class AuthenticationProviderRepository : IAuthenticationProviderRepository
+    public class AuthenticationProviderRepositoryImpl : IAuthenticationProviderRepository
     {
-        private readonly ILogger<AuthenticationProviderRepository> _logger;
+        private readonly ILogger<AuthenticationProviderRepositoryImpl> _logger;
         private ApplicationContext _context;
 
-        public AuthenticationProviderRepository(ILogger<AuthenticationProviderRepository> logger, ApplicationContext context)
+        public AuthenticationProviderRepositoryImpl(ILogger<AuthenticationProviderRepositoryImpl> logger, ApplicationContext context)
         {
             _logger = logger;
             _context = context;

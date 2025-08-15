@@ -76,7 +76,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Controller
 
                 _logger.LogInformation("Requisição recebida para cadastrar sistema: [{name}].", postClientSystemRequestDTO.Name);
 
-                var createdSystem = await _clientSystemService.CreateClientSystemAsync(tenantId,postClientSystemRequestDTO);
+                var createdSystem = await _clientSystemService.CreateClientSystemAsync(tenantId, postClientSystemRequestDTO);
                 if (createdSystem is not null)
                 {
                     stopwatch.Stop();

@@ -1,4 +1,4 @@
-﻿using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
+﻿ using GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Usuario;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tenant/{tenantId}/[controller]")]
     [Authorize]
     public class UserController : ControllerBase
     {
@@ -23,11 +23,11 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 
         [HttpGet("list")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> GetAllUsersAsync()
+        public async Task<IActionResult> GetAllUsersAsync(int tenantId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todos os usuários");
-            var users = await _userService.GetAllUsersAsync();
+            var users = await _userService.GetAllUsersAsync(tenantId);
             _logger.LogInformation(
                "Requisição finalizada com sucesso. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
                HttpContext.Request.Method,
@@ -38,11 +38,11 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             return Ok(users);
         }
 
-        [HttpGet("{id}", Name = "GetUserByIdAsync")]
-        public async Task<IActionResult> GetUserByIdAsync(int id)
+        [HttpGet("{userId}", Name = "GetUserByIdAsync")]
+        public async Task<IActionResult> GetUserByIdAsync(int tenantId, int userId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para buscar usuário ID: [{UserId}]", id);
+            _logger.LogInformation("Requisição recebida para buscar usuário ID: [{UserId}]", userId);
 
             var loggedInUser = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (loggedInUser is null)
@@ -60,21 +60,21 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             var loggedInUserId = int.Parse(loggedInUser);
             var isAdmin = User.IsInRole("Administrador") || User.IsInRole("Gerente de Produção");
 
-            if (loggedInUserId != id && !isAdmin)
+            if (loggedInUserId != userId && !isAdmin)
             {
                 _logger.LogWarning(
                     "Acesso negado: Usuário [{LoggedInUserId}] tentou acessar os dados do usuário [{TargetId}] sem permissão.",
-                    loggedInUserId, id);
+                    loggedInUserId, userId);
                 return Forbid();
             }
-            _logger.LogInformation("Usuário [{LoggedInUserId}] autorizado a acessar dados do usuário [{TargetId}].", loggedInUserId, id);
-            var user = await _userService.GetUserByIdAsync(id);
+            _logger.LogInformation("Usuário [{LoggedInUserId}] autorizado a acessar dados do usuário [{TargetId}].", loggedInUserId, userId);
+            var user = await _userService.GetUserByIdAsync(tenantId, userId);
             if (user is null)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
                "Usuário não encontrado na base: [{id}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-               id,
+               userId,
                HttpContext.Request.Method,
                HttpContext.Request.Path,
                404,
@@ -92,21 +92,21 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 );
             return Ok(user);
         }
-        [HttpDelete("{id}")]
+        [HttpDelete("{userId}")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> DeleteByIdAsync(int id)
+        public async Task<IActionResult> DeleteByIdAsync(int tenantId, int userId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para INATIVAR usuário ID: [{UserId}]", id);
+            _logger.LogInformation("Requisição recebida para INATIVAR usuário ID: [{UserId}]", userId);
 
-            var success = await _userService.DeactivateActivateUserAsync(id, false);
+            var success = await _userService.DeactivateActivateUserAsync(tenantId, userId, false);
 
             if (!success)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
                     "Tentativa de inativar usuário não existente ID: [{UserId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    userId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -118,7 +118,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             stopwatch.Stop();
             _logger.LogInformation(
                 "Usuário inativado com sucesso: [{UserId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                id,
+                userId,
                 HttpContext.Request.Method,
                 HttpContext.Request.Path,
                 204,
@@ -126,23 +126,23 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 );
             return NoContent();
         }
-        [HttpPut("admin/{id}")]
+        [HttpPut("admin/{userId}")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> UpdateAdminUserByIdAsync(int id, [FromBody] UpdateUserAdminRequestDTO updateUserAdminRequestDTO)
+        public async Task<IActionResult> UpdateAdminUserByIdAsync(int tenantId, int userId, [FromBody] UpdateUserAdminRequestDTO updateUserAdminRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Admin: Requisição recebida para atualizar usuário ID: [{UserId}]", id);
+            _logger.LogInformation("Admin: Requisição recebida para atualizar usuário ID: [{UserId}]", userId);
 
             try
             {
-                var updatedUser = await _userService.UpdateUserAdminAsync(id, updateUserAdminRequestDTO);
+                var updatedUser = await _userService.UpdateUserAdminAsync(tenantId, userId, updateUserAdminRequestDTO);
 
                 if (updatedUser is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                     "Admin: Tentativa de atualizar usuário não existente ID: [{UserId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    userId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -154,7 +154,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Admin Usuário atualizado com sucesso: [{UserId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    userId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,
@@ -178,10 +178,10 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         }
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUserByIdAsync(int id, [FromBody] UpdateUserRequestDTO updateUserRequestDTO)
+        public async Task<IActionResult> UpdateUserByIdAsync(int tenantId, int userId, [FromBody] UpdateUserRequestDTO updateUserRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Usuario: Requisição recebida para atualizar usuário ID: [{UserId}]", id);
+            _logger.LogInformation("Usuario: Requisição recebida para atualizar usuário ID: [{UserId}]", userId);
 
             try
             {
@@ -199,7 +199,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     return BadRequest(new { statusCode = 400, message = "Falha ao obter ID do usuário logado." });
                 }
 
-                var updatedUser = await _userService.UpdateUserAsync(loggedInUser, id, updateUserRequestDTO);
+                var updatedUser = await _userService.UpdateUserAsync(tenantId, loggedInUser, userId, updateUserRequestDTO);
 
                 if (updatedUser is null)
                 {

@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/tenant/{tenantId}/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -23,14 +23,14 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 
         [HttpPost("register")]
         [Authorize(Roles = "Administrador")]
-        public async Task<IActionResult> PostUserAsync([FromBody] RegistrationRequestDTO registrationRequestDTO)
+        public async Task<IActionResult> PostUserAsync(int tenantId, [FromBody] RegistrationRequestDTO registrationRequestDTO)
         {
             _logger.LogInformation("Requisição recebida para cadastro do usuario [{username}].", registrationRequestDTO.Username);
             var stopwatch = Stopwatch.StartNew();
             try
             {
 
-                var createdUser = await _authService.RegisterAsync(registrationRequestDTO);
+                var createdUser = await _authService.RegisterAsync(tenantId, registrationRequestDTO);
 
                 stopwatch.Stop();
                 _logger.LogInformation(
@@ -59,14 +59,14 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
         }
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginAsync(LoginRequestDTO loginRequestDTO)
+        public async Task<IActionResult> LoginAsync(int tenantId, LoginRequestDTO loginRequestDTO)
         {
             _logger.LogInformation("Requisição recebida para login do usuario [{userame}].", loginRequestDTO.Username);
             var stopwatch = Stopwatch.StartNew();
             try
             {
 
-                var token = await _authService.LoginAsync(loginRequestDTO);
+                var token = await _authService.LoginAsync(tenantId, loginRequestDTO);
 
                 if (token is not null)
                 {
@@ -100,7 +100,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 
         }
         [HttpPut("password/change")]
-        public async Task<IActionResult> UpdateUserPasswordById([FromBody] UpdateUserPasswordRequestDTO updateUserPasswordRequestDTO)
+        public async Task<IActionResult> UpdateUserPasswordById(int tenantId, [FromBody] UpdateUserPasswordRequestDTO updateUserPasswordRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -125,7 +125,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                     }
                 }
                 _logger.LogInformation("Requisição recebida para atualizar senha do usuário ID: [{UserId}]", loggedInUserIdString);
-                var userUpdated = await _authService.UpdateUserPasswordByIdAsync(int.Parse(loggedInUserIdString), updateUserPasswordRequestDTO);
+                var userUpdated = await _authService.UpdateUserPasswordByIdAsync(tenantId,int.Parse(loggedInUserIdString), updateUserPasswordRequestDTO);
 
                 if (userUpdated.Equals(false))
                 {

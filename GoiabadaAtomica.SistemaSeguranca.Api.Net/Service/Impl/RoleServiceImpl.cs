@@ -3,6 +3,7 @@ using GoiabadaAtomica.ApiAutenticacao.Net.Model.entity;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
+using Mapster;
 using MapsterMapper;
 
 namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
@@ -10,84 +11,125 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
     public class RoleServiceImpl : IRoleService
     {
         private readonly IRoleRepository _roleRepository;
+        private readonly IClientSystemService _clientSystemService;
         private readonly ILogger<RoleServiceImpl> _logger;
         private readonly IMapper _mapper;
 
-        public RoleServiceImpl(IRoleRepository roleRepository, ILogger<RoleServiceImpl> logger, IMapper mapper)
+        public RoleServiceImpl(IRoleRepository roleRepository, IClientSystemService clientSystemService, ILogger<RoleServiceImpl> logger, IMapper mapper)
         {
             _roleRepository = roleRepository;
+            _clientSystemService = clientSystemService;
             _logger = logger;
             _mapper = mapper;
         }
 
 
-        public async Task<IEnumerable<RoleDTO>> GetAllRolesAsync()
+        public async Task<IEnumerable<RoleDTO>> GetAllRolesAsync(int tenantId, int clientSystemId)
         {
-            _logger.LogInformation("Iniciando listagem de Perfis");
-            return await _roleRepository.GetAllRolesAsync();
+            _logger.LogInformation("Iniciando processo de listagem de Roles do sistema [{ClientSystemID}] da empresa [{TenantId}]", clientSystemId, tenantId);
+            _logger.LogInformation("Iniciando validação de existência do sistema [{ClientSystemID}] da empresa [{TenantId}]", clientSystemId, tenantId);
+            if (!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
+            {
+                throw new InvalidOperationException($"Não há foi encontrado registro da empresa [{tenantId}]/sistema [{clientSystemId}]");
+            }
+            _logger.LogInformation("Processo de listagem de Roles do sistema[{ClientSystemID}] da empresa[{TenantId}] finalizado com sucesso", clientSystemId, tenantId);
+            return await _roleRepository.GetAllRolesAsync(clientSystemId);
         }
 
-        public async Task<RoleDTO?> GetRoleByIdAsync(int id)
+        public async Task<RoleDTO?> GetRoleByIdAsync(int tenantId, int clientSystemId, int roleId)
         {
-            var role = await _roleRepository.GetRoleByIdAsync(id);
+            _logger.LogInformation("Iniciando processo de busca da Role [{RoleId}] do sistema [{ClientSystemID}] da empresa [{TenantId}]", roleId, clientSystemId, tenantId);
+            _logger.LogInformation("Iniciando validação de existência do sistema [{ClientSystemID}] da empresa [{TenantId}]", clientSystemId, tenantId);
+            if (!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
+            {
+                throw new InvalidOperationException($"Não há foi encontrado registro da empresa [{tenantId}]/sistema [{clientSystemId}]");
+            }
+
+            var role = await _roleRepository.GetRoleByIdAsync(clientSystemId, roleId);
             if (role == null)
             {
+                _logger.LogInformation($"Role [{roleId}] não encontrada");
                 return null;
             }
+            _logger.LogInformation("Processo de listagem de Roles do sistema[{ClientSystemID}] da empresa[{TenantId}] finalizado com sucesso", clientSystemId, tenantId);
             return role;
         }
 
-        public async Task<RoleDTO?> UpdateRoleByIdAsync(int id, UpdateRolelRequestDTO updateRolelRequestDTO)
+        public async Task<RoleDTO?> UpdateRoleByIdAsync(int clientSystemId, int tenantId, int roleId, UpdateRoleRequestDTO updateRoleRequestDTO)
         {
-            _logger.LogInformation("Tentando atualizar o perfil [{id}]", id);
+            _logger.LogInformation("Tentando atualizar o perfil [{id}]", roleId);
 
-            var roleEntity = await _roleRepository.GetRoleEntityByIdAsync(id);
+            _logger.LogInformation("Iniciando validação de existência do sistema [{ClientSystemID}] da empresa [{TenantId}]", clientSystemId, tenantId);
+            if (!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
+            {
+                throw new InvalidOperationException($"Não há foi encontrado registro da empresa [{tenantId}]/sistema [{clientSystemId}]");
+            }
+
+            var roleEntity = await _roleRepository.GetRoleEntityByIdAsync(clientSystemId, roleId);
             if (roleEntity is null)
             {
                 return null;
             }
 
-            if (await _roleRepository.ExistsRoleByNameAsync(updateRolelRequestDTO.Name, id))
+            if (await _roleRepository.ExistsRoleByNameAsync(clientSystemId, updateRoleRequestDTO.Name, roleId))
             {
-                throw new InvalidOperationException($"Há um perfil em uso com o nome [{updateRolelRequestDTO.Name}]");
+                throw new InvalidOperationException($"Há um perfil em uso com o nome [{updateRoleRequestDTO.Name}]");
             }
 
-            _mapper.Map(updateRolelRequestDTO, roleEntity);
+            _mapper.Map(updateRoleRequestDTO, roleEntity);
 
             await _roleRepository.SaveChangesAsync();
 
             return _mapper.Map<RoleDTO>(roleEntity);
         }
 
-        public async Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus)
+        public async Task<RoleDTO> DeactivateActivateRolesByIdAsync(int tenantId, int clientSystemId, int roleId, bool newStatus)
         {
-            if (await CheckRoleIUseAync(id))
             {
-                var msg = $"O perfil [{id}] está em uso, operação inválida";
-                _logger.LogWarning(msg);
-                throw new InvalidOperationException(msg);
-            }
-            _logger.LogInformation("Tentando atualizar o status do perfil [{id}], para o status: [{status}]", id, newStatus);
-            var role = await _roleRepository.GetRoleEntityByIdAsync(id);
-            if (role is null)
-            {
-                return null;
-            }
+                var statusText = newStatus ? "ativação" : "desativação";
+                _logger.LogInformation("Iniciando processo de [{StatusText}] para o Role ID [{RoleId}]", statusText, roleId);
 
-            if (role.IsActive.Equals(newStatus))
-            {
-                return false;
+                await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId);
+
+                var roleEntity = await _roleRepository.GetRoleEntityByIdAsync(clientSystemId, roleId);
+
+                if (roleEntity is null || roleEntity.ClientSystemId != clientSystemId)
+                {
+                    _logger.LogWarning("Role ID [{RoleId}] não encontrado ou não pertence ao ClientSystem ID [{ClientSystemId}]", roleId, clientSystemId);
+                    throw new KeyNotFoundException("Perfil não encontrado ou não pertence a este sistema.");
+                }
+
+                if (roleEntity.IsActive == newStatus)
+                {
+                    var currentStatusText = newStatus ? "ativo" : "inativo";
+                    throw new InvalidOperationException($"O perfil já se encontra [{currentStatusText}].");
+                }
+
+                if (newStatus == false && await CheckRoleIUseAync(roleId))
+                {
+                    var msg = $"O perfil [{roleId}] está em uso por um ou mais usuários e não pode ser desativado.";
+                    _logger.LogWarning(msg);
+                    throw new InvalidOperationException(msg);
+                }
+
+                _logger.LogInformation("Alterando status do Role ID [{RoleId}] para [{NewStatus}]", roleId, newStatus);
+                roleEntity.IsActive = newStatus;
+
+                await _roleRepository.SaveChangesAsync();
+
+                return roleEntity.Adapt<RoleDTO>();
             }
-
-            role.IsActive = newStatus;
-            await _roleRepository.SaveChangesAsync();
-
-            return true;
         }
 
-        public async Task<RoleDTO> CreateRoleAsync(PostRoleRequestDTO postRoleRequestDTO)
+        public async Task<RoleDTO> CreateRoleAsync(int tenantId, int clientSystemId, PostRoleRequestDTO postRoleRequestDTO)
         {
-            if (await _roleRepository.ExistsRoleByNameAsync(postRoleRequestDTO.Name))
+            _logger.LogInformation("Iniciando validação de existência do sistema [{ClientSystemID}] da empresa [{TenantId}]", clientSystemId, tenantId);
+            if (!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
+            {
+                throw new InvalidOperationException($"Não há foi encontrado registro da empresa [{tenantId}]/sistema [{clientSystemId}]");
+            }
+
+            if (await _roleRepository.ExistsRoleByNameAsync(clientSystemId, postRoleRequestDTO.Name))
             {
                 throw new InvalidOperationException($"Há um perfil em uso com o nome [{postRoleRequestDTO.Name}]");
             }
@@ -95,7 +137,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             var role = _mapper.Map<RoleEntity>(postRoleRequestDTO);
             role.IsActive = true;
 
-            var newRoleEntity = await _roleRepository.CreateRolelAsync(role);
+            var newRoleEntity = await _roleRepository.CreateRoleAsync(role);
 
             return _mapper.Map<RoleDTO>(newRoleEntity);
         }

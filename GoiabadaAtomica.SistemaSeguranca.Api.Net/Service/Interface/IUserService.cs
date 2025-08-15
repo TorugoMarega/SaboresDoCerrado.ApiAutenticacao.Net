@@ -5,10 +5,10 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserDTO>> GetAllUsersAsync();
-        Task<UserDTO?> GetUserByIdAsync(int id);
-        Task<bool> DeactivateActivateUserAsync(int id, bool status);
-        Task<UserDTO?> UpdateUserAdminAsync(int id, UpdateUserAdminRequestDTO updateUserAdminRequestDTO);
-        Task<UserDTO?> UpdateUserAsync(int loggedInUser, int idReq, UpdateUserRequestDTO updateUserRequestDTO);
+        Task<IEnumerable<UserDTO>> GetAllUsersAsync(int tenantId);
+        Task<UserDTO?> GetUserByIdAsync(int tenantId, int userId);
+        Task<bool> DeactivateActivateUserAsync(int tenantId, int userId, bool status);
+        Task<UserDTO?> UpdateUserAdminAsync(int tenantId, int userId, UpdateUserAdminRequestDTO updateUserAdminRequestDTO);
+        Task<UserDTO?> UpdateUserAsync(int tenantId, int loggedInUser, int idReq, UpdateUserRequestDTO updateUserRequestDTO);
     }
 }

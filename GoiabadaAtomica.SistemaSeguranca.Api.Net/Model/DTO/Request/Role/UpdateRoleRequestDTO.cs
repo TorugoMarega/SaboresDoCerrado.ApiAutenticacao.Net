@@ -2,7 +2,7 @@
 
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Model.DTO.Request.Perfil
 {
-    public class UpdateRolelRequestDTO
+    public class UpdateRoleRequestDTO
     {
         [Required(ErrorMessage = "O nome do perfil é obrigatório.")]
         public string Name { get; set; }

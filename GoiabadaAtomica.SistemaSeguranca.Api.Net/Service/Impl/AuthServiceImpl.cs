@@ -29,20 +29,20 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             _logger = logger;
             _mapper = mapper;
         }
-        public async Task<UserDTO> RegisterAsync(RegistrationRequestDTO registrationRequestDTO)
+        public async Task<UserDTO> RegisterAsync(int tenantId, RegistrationRequestDTO registrationRequestDTO)
         {
             _logger.LogInformation("Iniciando processo de registro para o usuário: [{Username}]", registrationRequestDTO.Username);
 
-            if (await _userRepository.UsernameExistsAsync(registrationRequestDTO.Username))
+            if (await _userRepository.UsernameExistsAsync(tenantId, registrationRequestDTO.Username))
             {
                 throw new InvalidOperationException("O nome de usuário já está em uso");
             }
-            if (await _userRepository.EmailExistsAsync(registrationRequestDTO.Email))
+            if (await _userRepository.EmailExistsAsync(tenantId, registrationRequestDTO.Email))
             {
                 throw new InvalidOperationException("O e-mail já está cadastrado na base");
             }
 
-            var existentRolesCount = await _roleRepository.CountRolesAsync(registrationRequestDTO.RoleIds);
+            var existentRolesCount = await _roleRepository.CountRolesAsync(tenantId, registrationRequestDTO.RoleIds);
             if (existentRolesCount != registrationRequestDTO.RoleIds.Count)
             {
                 _logger.LogWarning("Tentativa de registro com um ou mais IDs de perfil inválidos.");
@@ -61,12 +61,13 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
+                TenantId = tenantId,
                 UserRole = registrationRequestDTO.RoleIds.Select(role => new UserRoleEntity { RoleId = role }).ToList()
             };
             _logger.LogDebug("Tentando persistir usuario");
             var registeredUser = await _userRepository.RegisterUserAsync(userEntity);
             _logger.LogDebug("Usuario persistido com sucesso, ID: [{UserId}]", registeredUser.Id);
-            var userDTO = await _userRepository.GetUserByIdAsync(registeredUser.Id);
+            var userDTO = await _userRepository.GetUserByIdAsync(tenantId, registeredUser.Id);
             if (userDTO is null)
             {
                 _logger.LogError("Falha crítica: Não foi possível encontrar o usuário com ID [{UserId}] imediatamente após o registro.", userEntity.Id);
@@ -75,11 +76,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             return userDTO;
         }
 
-        public async Task<LoginResponseDTO?> LoginAsync(LoginRequestDTO loginRequestDTO)
+        public async Task<LoginResponseDTO?> LoginAsync(int tenantId,LoginRequestDTO loginRequestDTO)
         {
             _logger.LogInformation("Iniciando tentativa de login para o usuário [{username}]", loginRequestDTO.Username);
 
-            var user = await _userRepository.GetByUsernameWithTenantAsync(loginRequestDTO.Username);
+            var user = await _userRepository.GetByUsernameWithTenantAsync(tenantId, loginRequestDTO.Username);
 
             if (user is null)
             {
@@ -110,31 +111,31 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             };
         }
 
-        public async Task<bool> UpdateUserPasswordByIdAsync(int Id, UpdateUserPasswordRequestDTO updateUserPasswordRequestDTO)
+        public async Task<bool> UpdateUserPasswordByIdAsync(int tenantId,int userId, UpdateUserPasswordRequestDTO updateUserPasswordRequestDTO)
         {
-            _logger.LogInformation("Buscando usuário [{UserId}]", Id);
-            var userEntity = await _userRepository.GetUserEntityByIdAsync(Id);
+            _logger.LogInformation("Buscando usuário [{UserId}]", userId);
+            var userEntity = await _userRepository.GetUserEntityByIdAsync(tenantId, userId);
             if (userEntity is null)
             {
-                _logger.LogWarning("Tentando atualizar senha de um usuário não cadastrado na base. Usuario [{UserId}]", Id);
+                _logger.LogWarning("Tentando atualizar senha de um usuário não cadastrado na base. Usuario [{UserId}]", userId);
                 return false;
             }
-            _logger.LogInformation("Validando senha atual do usuário [{UserId}]", Id);
+            _logger.LogInformation("Validando senha atual do usuário [{UserId}]", userId);
             if (!BCrypt.Net.BCrypt.Verify(updateUserPasswordRequestDTO.CurrentPassword, userEntity.PasswordHash))
             {
-                var msg = $"Falha na alteração de senha para o usuário ID [{Id}]: Senha atual incorreta.";
+                var msg = $"Falha na alteração de senha para o usuário ID [{userId}]: Senha atual incorreta.";
                 _logger.LogWarning(msg);
                 throw new InvalidOperationException(msg);
             }
 
-            _logger.LogDebug("Senha atual verificada com sucesso. Gerando novo hash para o usuário ID [{UserId}]", Id);
+            _logger.LogDebug("Senha atual verificada com sucesso. Gerando novo hash para o usuário ID [{UserId}]", userId);
             var newPasswordHash = BCrypt.Net.BCrypt.HashPassword(updateUserPasswordRequestDTO.NewPassword);
             userEntity.PasswordHash = newPasswordHash;
             userEntity.UpdatedAt = DateTime.UtcNow;
-            _logger.LogInformation("Tentando atualizar senha usuario pelo id [{UserId}]", Id);
+            _logger.LogInformation("Tentando atualizar senha usuario pelo id [{UserId}]", userId);
             await _userRepository.UpdateUserAsync(userEntity);
 
-            _logger.LogInformation("Senha do usuário ID [{UserId}] alterada com sucesso.", Id);
+            _logger.LogInformation("Senha do usuário ID [{UserId}] alterada com sucesso.", userId);
             return true;
         }
 

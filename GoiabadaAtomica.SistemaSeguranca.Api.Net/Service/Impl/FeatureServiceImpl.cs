@@ -1,8 +1,8 @@
 ﻿using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Request.Feature;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.DTO.Response;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Model.Entity;
-using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using GoiabadaAtomica.SistemaSeguranca.Api.Net.Repository.Interface;
+using GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface;
 using Mapster;
 using IClientSystemService = GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface.IClientSystemService;
 
@@ -44,9 +44,9 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
         public async Task<FeatureDTO?> UpdateFeatureAsync(int tenantId, int clientSystemId, int featureId, UpdateFeatureRequestDTO updateFeatureRequestDTO)
         {
             _logger.LogInformation("Iniciando processo de atualização da Feature [{FeatureId}] - [{Name}] do sistema [{clientSystemId}] da empresa [{TenantId}]", featureId, updateFeatureRequestDTO.Name, clientSystemId, tenantId);
-            
+
             _logger.LogInformation("Validando existência do ClientSystem ID [{ClientSystemId}] e da Empresa [{TenantId}]", clientSystemId, tenantId);
-            if(!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
+            if (!await _clientSystemService.ExistsClientSystemByIdAsync(tenantId, clientSystemId))
             {
                 _logger.LogWarning("O sistema [{ClientSystemId}] não foi encontrado para a empresa [{TenantId}]", clientSystemId, tenantId);
                 throw new InvalidOperationException($"O sistema [{clientSystemId}] não foi encontrado para a empresa [{tenantId}]");

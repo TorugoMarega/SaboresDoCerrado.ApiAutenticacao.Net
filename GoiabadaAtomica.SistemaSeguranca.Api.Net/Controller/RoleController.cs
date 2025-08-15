@@ -7,24 +7,24 @@ using System.Diagnostics;
 namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 {
     [ApiController]
-    [Route("api/clientsystem/{clientSystemId}/[controller]")]
+    [Route("api/tenant/{tenantId}/clientsystem/{clientSystemId}/[controller]")]
     [Authorize(Roles = "Administrador")]
     public class RoleController : ControllerBase
     {
-        private readonly IRoleService _rolelService;
+        private readonly IRoleService _roleService;
         private readonly ILogger<RoleController> _logger; //inject
         public RoleController(IRoleService rolelService, ILogger<RoleController> logger)
         {
-            _rolelService = rolelService;
+            _roleService = rolelService;
             _logger = logger;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllRolesAsync(int clientSystemId)
+        public async Task<IActionResult> GetAllRolesAsync(int tenantId, int clientSystemId)
         {
             var stopwatch = Stopwatch.StartNew();
             _logger.LogInformation("Requisição recebida para listar todos os perfis.");
-            var roles = await _rolelService.GetAllRolesAsync();
+            var roles = await _roleService.GetAllRolesAsync(tenantId, clientSystemId);
             stopwatch.Stop();
             _logger.LogInformation(
                 "Requisição finalizada. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
@@ -36,12 +36,12 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             return Ok(roles);
         }
 
-        [HttpGet("{id}", Name = "GetRoleByIdAsync")]
-        public async Task<IActionResult> GetRoleByIdAsync(int id)
+        [HttpGet("{roleId}", Name = "GetRoleByIdAsync")]
+        public async Task<IActionResult> GetRoleByIdAsync(int tenantId, int clientSystemId, int roleId)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para buscar perfil por ID: [{ID}].", id);
-            var role = await _rolelService.GetRoleByIdAsync(id);
+            _logger.LogInformation("Requisição recebida para buscar perfil por ID: [{ID}].", roleId);
+            var role = await _roleService.GetRoleByIdAsync(tenantId, clientSystemId, roleId);
             if (role is null)
             {
                 stopwatch.Stop();
@@ -65,7 +65,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             return Ok(role);
         }
         [HttpPost]
-        public async Task<IActionResult> PostRoleAsync([FromBody] PostRoleRequestDTO postRoleRequestDTO)
+        public async Task<IActionResult> PostRoleAsync(int tenantId, int clientSystemId, [FromBody] PostRoleRequestDTO postRoleRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -73,7 +73,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
 
                 _logger.LogInformation("Requisição recebida para cadastrar perfil: [{name}].", postRoleRequestDTO.Name);
 
-                var createdRole = await _rolelService.CreateRoleAsync(postRoleRequestDTO);
+                var createdRole = await _roleService.CreateRoleAsync(tenantId, clientSystemId, postRoleRequestDTO);
                 if (createdRole is not null)
                 {
                     stopwatch.Stop();
@@ -111,86 +111,78 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
             }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeactivateRoleById(int id)
+        [HttpDelete("{roleId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> DeactivateRoleById(int tenantId, int clientSystemId, int roleId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", id);
+                _logger.LogInformation("Requisição recebida para INATIVAR o perfil ID: [{RoleId}]", roleId);
 
-                var success = await _rolelService.DeactivateActivateRolesByIdAsync(id, false);
-
-                if (success is null)
-                {
-                    stopwatch.Stop();
-                    _logger.LogWarning(
-                        "Tentativa de inativar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
-                        HttpContext.Request.Method,
-                        HttpContext.Request.Path,
-                        404,
-                        stopwatch.ElapsedMilliseconds
-                        );
-                    return NotFound();
-                }
-
-                if (success.Equals(false))
-                {
-                    stopwatch.Stop();
-                    _logger.LogWarning(
-                        "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                        id,
-                        HttpContext.Request.Method,
-                        HttpContext.Request.Path,
-                        409,
-                        stopwatch.ElapsedMilliseconds
-                        );
-                    return Conflict(new { mensagem = $"O perfil [{id}] já está inativo" });
-                }
+                await _roleService.DeactivateActivateRolesByIdAsync(tenantId, clientSystemId, roleId, false);
 
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Perfil inativado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    roleId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     204,
                     stopwatch.ElapsedMilliseconds
-                    );
+                );
+
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                stopwatch.Stop();
+                _logger.LogWarning(
+                    "Tentativa de inativar perfil não existente ID: [{RoleId}]. {ErrorMessage}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    roleId,
+                    ex.Message,
+                    HttpContext.Request.Method,
+                    HttpContext.Request.Path,
+                    404,
+                    stopwatch.ElapsedMilliseconds
+                );
+                return NotFound(new { mensagem = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
                 stopwatch.Stop();
                 _logger.LogWarning(
-                    "Tentativa de inativar perfil finalizada sem sucesso para o ID: [{RoleId}]. {msg}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    "Tentativa de inativar perfil falhou por regra de negócio para o ID: [{RoleId}]. {ErrorMessage}. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
+                    roleId,
                     ex.Message,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     409,
                     stopwatch.ElapsedMilliseconds
-                    );
+                );
                 return Conflict(new { mensagem = ex.Message });
             }
+
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRoleByIdAsync(int id, [FromBody] UpdateRolelRequestDTO updateRolelRequestDTO)
+
+        [HttpPut("{roleId}")]
+        public async Task<IActionResult> UpdateRoleByIdAsync(int tenantId, int clientSystemId, int roleId, [FromBody] UpdateRoleRequestDTO updateRolelRequestDTO)
         {
             var stopwatch = Stopwatch.StartNew();
-            _logger.LogInformation("Requisição recebida para atualizar o Perfil ID: [{RoleId}]", id);
+            _logger.LogInformation("Requisição recebida para atualizar o Perfil ID: [{RoleId}]", roleId);
 
             try
             {
-                var updatedRole = await _rolelService.UpdateRoleByIdAsync(id, updateRolelRequestDTO);
+                var updatedRole = await _roleService.UpdateRoleByIdAsync(tenantId, clientSystemId, roleId, updateRolelRequestDTO);
 
                 if (updatedRole is null)
                 {
                     stopwatch.Stop();
                     _logger.LogWarning(
                     "Tentativa de atualizar perfil não existente ID: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    roleId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     404,
@@ -202,7 +194,7 @@ namespace GoiabadaAtomica.ApiAutenticacao.Net.Controller
                 stopwatch.Stop();
                 _logger.LogInformation(
                     "Perfil atualizado com sucesso: [{RoleId}]. Método: {HttpMethod}, Caminho: {Path}, Status: {StatusCode}, Duration: {Duration}ms",
-                    id,
+                    roleId,
                     HttpContext.Request.Method,
                     HttpContext.Request.Path,
                     200,

@@ -5,11 +5,11 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Interface
 {
     public interface IRoleService
     {
-        Task<IEnumerable<RoleDTO>> GetAllRolesAsync();
-        Task<RoleDTO?> GetRoleByIdAsync(int id);
-        Task<bool?> DeactivateActivateRolesByIdAsync(int id, bool newStatus);
-        Task<RoleDTO?> UpdateRoleByIdAsync(int id, UpdateRolelRequestDTO updateRolelRequestDTO);
-        Task<RoleDTO> CreateRoleAsync(PostRoleRequestDTO postRoleRequestDTO);
+        Task<IEnumerable<RoleDTO>> GetAllRolesAsync(int tenantId, int clientSystemId);
+        Task<RoleDTO?> GetRoleByIdAsync(int tenantId, int clientSystemId, int roleId);
+        Task<RoleDTO> DeactivateActivateRolesByIdAsync(int tenantId, int clientSystemId, int roleId, bool newStatus);
+        Task<RoleDTO?> UpdateRoleByIdAsync(int tenantId, int clientSystemId, int roleId, UpdateRoleRequestDTO updateRolelRequestDTO);
+        Task<RoleDTO> CreateRoleAsync(int tenantId, int clientSystemId, PostRoleRequestDTO postRoleRequestDTO);
         Task<bool> CheckRoleIUseAync(int roleId);
     }
 }

@@ -11,22 +11,22 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
     public class ClientSystemServiceImpl : IClientSystemService
     {
         private readonly IClientSystemRepository _clientSystemRepository;
-        private readonly IFeatureService _featureService;
+        private readonly IFeatureRepository _featureRepository;
         private readonly IAuthenticationProviderRepository _authenticationProviderRepository;
         private readonly ILogger<ClientSystemServiceImpl> _logger;
 
-        public ClientSystemServiceImpl(IClientSystemRepository clientSystemRepository, ILogger<ClientSystemServiceImpl> logger, IFeatureService featureService, IAuthenticationProviderRepository authenticationProviderRepository)
+        public ClientSystemServiceImpl(IClientSystemRepository clientSystemRepository, ILogger<ClientSystemServiceImpl> logger, IFeatureRepository featureRepository, IAuthenticationProviderRepository authenticationProviderRepository)
         {
             _clientSystemRepository = clientSystemRepository;
             _logger = logger;
-            _featureService = featureService;
+            _featureRepository = featureRepository;
             _authenticationProviderRepository = authenticationProviderRepository;
         }
 
-        public async Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(int tenantId,CreateClientSystemRequestDTO createClientSystemRequestDTO)
+        public async Task<CreateClientSystemResponseDTO> CreateClientSystemAsync(int tenantId, CreateClientSystemRequestDTO createClientSystemRequestDTO)
         {
             _logger.LogInformation("Validando o nome do sistema");
-            if (await _clientSystemRepository.ExistsClientSystemByNameAsync(tenantId,createClientSystemRequestDTO.Name))
+            if (await _clientSystemRepository.ExistsClientSystemByNameAsync(tenantId, createClientSystemRequestDTO.Name))
             {
                 throw new InvalidOperationException($"O nome [{createClientSystemRequestDTO.Name}] já está em uso por outro sistema já cadastrado anteriormente!");
             }
@@ -69,7 +69,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
             }
             return clientSystem;
         }
-        public async Task<ClientSystemDTO?> UpdateClientSystemAsync(int tenantId,int clientSystemId, UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
+        public async Task<ClientSystemDTO?> UpdateClientSystemAsync(int tenantId, int clientSystemId, UpdateClientSystemRequestDTO updateClientSystemRequestDTO)
         {
             _logger.LogInformation("Buscando Sistema [{ID}] no banco de dados", clientSystemId);
 
@@ -117,7 +117,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
         }
         public async Task<bool> ExistsClientSystemByIdAsync(int tenantId, int clientSystemId)
         {
-            _logger.LogInformation("Verificando existência do Sistema [{ClientSystemId}]", clientSystemId);
+            _logger.LogInformation("Verificando existência do Sistema [{ClientSystemId}] na empresa [{TenantId}]", clientSystemId, tenantId);
             return await _clientSystemRepository.ExistsClientSystemById(tenantId, clientSystemId);
         }
         private async Task ValidationDeactivateActivateClientSystemAsync(int clientSystemId, bool newStatus)
@@ -134,7 +134,7 @@ namespace GoiabadaAtomica.SistemaSeguranca.Api.Net.Service.Impl
                 }
 
                 // Validação 2: Funcionalidades (Features)
-                if (await _featureService.HasActiveFeaturesAsync(clientSystemId))
+                if (await _featureRepository.HasActiveFeaturesAsync(clientSystemId))
                 {
                     throw new InvalidOperationException("Este sistema não pode ser inativado pois possui funcionalidades ativas.");
                 }

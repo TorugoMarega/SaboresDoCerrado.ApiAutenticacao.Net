@@ -96,6 +96,14 @@ builder.Services.AddScoped<IUserService, UserServiceImpl>();
 builder.Services.AddScoped<ITenantService, TenantServiceImpl>();
 builder.Services.AddScoped<ITenantRepository, TenantRepositoryImpl>();
 
+builder.Services.AddScoped<IClientSystemService, ClientSystemServiceImpl>();
+builder.Services.AddScoped<IClientSystemRepository, ClientSystemRepositoryImpl>();
+
+builder.Services.AddScoped<IFeatureService, FeatureServiceImpl>();
+builder.Services.AddScoped<IFeatureRepository, FeatureRepositoryImpl>();
+
+builder.Services.AddScoped<IAuthenticationProviderRepository, AuthenticationProviderRepositoryImpl>();
+
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
 
